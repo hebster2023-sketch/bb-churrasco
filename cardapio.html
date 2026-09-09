@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#121212">
+    <meta name="theme-color" content="#121212" id="meta-theme-color">
     <title>CARDÁPIO DIGITAL – B.B CHURRASCO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -17,18 +17,17 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         .cats::-webkit-scrollbar { display: none; }
-        transition-custom { transition: all 0.25s ease-in-out; }
     </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 dark:bg-[#0d0f12] dark:text-zinc-100 min-h-screen pb-36 transition-colors duration-300" id="corpo-pagina">
+<body class="bg-zinc-100 text-zinc-900 dark:bg-[#0d0f12] dark:text-zinc-100 min-h-screen pb-36 transition-colors duration-300">
 
     <!-- Modal de Seleção de Mesa -->
     <div id="modal-mesa" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 text-center shadow-2xl">
             <h1 class="text-2xl font-black text-red-600 mb-1">B.B CHURRASCO</h1>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-5">Selecione o número da sua mesa para ver o cardápio:</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-5">Selecione o número da sua mesa:</p>
             <div id="grid-mesas" class="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto mb-2 p-1">
-                <!-- Preenchido via JS -->
+                <!-- Preenchido via JS com status de ocupadas -->
             </div>
         </div>
     </div>
@@ -65,7 +64,7 @@
                     <p id="mesa-display" class="text-xs text-red-100 mt-0.5 font-medium">Mesa -- • Cardápio Digital</p>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <!-- Botão Alternar Tema -->
+                    <!-- Botão Alternar Tema Fundo Completo -->
                     <button onclick="alternarTema()" class="bg-black/20 hover:bg-black/30 w-9 h-9 rounded-2xl flex items-center justify-center backdrop-blur-md text-sm transition-transform active:scale-95" title="Mudar Tema">
                         <span id="icone-tema">☀️</span>
                     </button>
@@ -139,7 +138,6 @@
         }
         const db = firebase.firestore();
 
-        // Cardápio completo com especificações corretas de embalagens e sem queijo no baião grande
         const cardapio = {
             "CHURRASCOS": [
                 ["Frango", 8, "Suculento espeto de frango"],
@@ -218,18 +216,22 @@
         let categoriaAtiva = "CHURRASCOS";
         let carrinho = [];
 
-        // Gerenciamento de Tema (Claro / Escuro)
+        // Alternar Tema Global (Fundo Inteiro)
         function alternarTema() {
             const html = document.documentElement;
             const icone = document.getElementById('icone-tema');
+            const metaTheme = document.getElementById('meta-theme-color');
+            
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
                 localStorage.setItem('bb_tema', 'light');
                 icone.innerText = '🌙';
+                metaTheme.setAttribute('content', '#f43f5e');
             } else {
                 html.classList.add('dark');
                 localStorage.setItem('bb_tema', 'dark');
                 icone.innerText = '☀️';
+                metaTheme.setAttribute('content', '#121212');
             }
         }
 
@@ -237,22 +239,67 @@
             const salvo = localStorage.getItem('bb_tema') || 'dark';
             const html = document.documentElement;
             const icone = document.getElementById('icone-tema');
+            const metaTheme = document.getElementById('meta-theme-color');
+
             if (salvo === 'light') {
                 html.classList.remove('dark');
                 icone.innerText = '🌙';
+                metaTheme.setAttribute('content', '#f43f5e');
             } else {
                 html.classList.add('dark');
                 icone.innerText = '☀️';
+                metaTheme.setAttribute('content', '#121212');
             }
         }
 
-        // Inicialização das Mesas
-        function iniciarGridMesas() {
+        // Carrega o grid de mesas checando no Firebase quais estão ocupadas
+        async function iniciarGridMesas() {
             const grid = document.getElementById('grid-mesas');
-            grid.innerHTML = '';
-            for (let i = 1; i <= 30; i++) {
-                grid.innerHTML += `<button onclick="selecionarMesa(${i})" class="bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 text-zinc-800 dark:text-zinc-200 font-bold py-3 rounded-2xl text-sm border border-zinc-200 dark:border-zinc-700/50 transition-all">${i}</button>`;
+            grid.innerHTML = `<p class="col-span-5 text-center text-xs text-zinc-400 py-6">Verificando mesas...</p>`;
+
+            try {
+                // Busca comandas ativas no Firestore
+                const snapshot = await db.collection('comandas').get();
+                const mesasOcupadas = {};
+                
+                snapshot.forEach(doc => {
+                    const dados = doc.data();
+                    // Considera ocupada se tiver itens e total > 0
+                    if (dados.itens && dados.itens.length > 0) {
+                        mesasOcupadas[doc.id] = true;
+                    }
+                });
+
+                grid.innerHTML = '';
+                for (let i = 1; i <= 30; i++) {
+                    const ocupada = mesasOcupadas[String(i)] || false;
+                    
+                    if (ocupada) {
+                        grid.innerHTML += `
+                            <div onclick="tentarAbrirMesaOcupada(${i})" class="bg-red-500/10 dark:bg-red-950/30 border border-red-500/30 rounded-2xl p-2 flex flex-col items-center justify-center cursor-pointer opacity-80 hover:opacity-100 transition-all">
+                                <span class="font-black text-xs text-red-600 dark:text-red-400">Mesa ${i}</span>
+                                <span class="text-[9px] font-bold text-red-500 uppercase mt-0.5 tracking-tight">Ocupada</span>
+                            </div>
+                        `;
+                    } else {
+                        grid.innerHTML += `
+                            <button onclick="selecionarMesa(${i})" class="bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 text-zinc-800 dark:text-zinc-200 font-bold py-3 rounded-2xl text-sm border border-zinc-200 dark:border-zinc-700/50 transition-all flex flex-col items-center justify-center">
+                                <span>${i}</span>
+                            </button>
+                        `;
+                    }
+                }
+            } catch (err) {
+                // Caso ocorra erro de conexão, monta normal sem trava para não travar o cliente
+                grid.innerHTML = '';
+                for (let i = 1; i <= 30; i++) {
+                    grid.innerHTML += `<button onclick="selecionarMesa(${i})" class="bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 text-white font-bold py-3 rounded-2xl text-sm border border-zinc-200 dark:border-zinc-700">${i}</button>`;
+                }
             }
+        }
+
+        function tentarAbrirMesaOcupada(num) {
+            alert(`A Mesa ${num} já está ocupada por outros clientes!\nPor motivos de segurança e privacidade, não é possível acessar comandas de outras mesas. Caso seja sua mesa, por favor solicite ao garçom.`);
         }
 
         function verificarMesaInicial() {
@@ -276,7 +323,7 @@
             iniciarGridMesas();
         }
 
-        // Histórico da Comanda no Firebase
+        // Histórico da Comanda no Firebase com privacidade
         async function abrirComandaModal() {
             if (!mesaAtual) return;
             document.getElementById('sub-comanda-mesa').innerText = `Mesa ${mesaAtual}`;
