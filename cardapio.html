@@ -27,7 +27,7 @@
             <h1 class="text-2xl font-black text-red-600 mb-1">B.B CHURRASCO</h1>
             <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-5">Selecione o número da sua mesa:</p>
             <div id="grid-mesas" class="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto mb-2 p-1">
-                <!-- Preenchido via JS com status de ocupadas -->
+                <!-- Preenchido via JS -->
             </div>
         </div>
     </div>
@@ -42,7 +42,8 @@
                 </div>
                 <button onclick="fecharComandaModal()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 font-bold">&times;</button>
             </div>
-            <div id="lista-comanda-historico" class="space-y-2.5 max-h-72 overflow-y-auto mb-4 text-sm pr-1">
+            <p class="text-[11px] text-zinc-400 mb-3">Estes são os itens já registrados na comanda (não podem ser alterados para evitar fraudes).</p>
+            <div id="lista-comanda-historico" class="space-y-2.5 max-h-60 overflow-y-auto mb-4 text-sm pr-1">
                 <!-- Preenchido via JS -->
             </div>
             <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3 flex justify-between items-center font-black text-base mb-4">
@@ -111,7 +112,7 @@
                 <h2 id="modal-titulo" class="text-base font-black text-zinc-900 dark:text-white">Confirme seu Pedido</h2>
                 <button onclick="fecharResumo()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 font-bold">&times;</button>
             </div>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-3">Após enviar, o pedido vai direto para a comanda da mesa.</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-3">Após enviar, os novos itens vão para a comanda e não poderão ser removidos por aqui.</p>
             <div id="lista-carrinho" class="space-y-2 max-h-56 overflow-y-auto mb-3 text-sm pr-1"></div>
             <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3 flex justify-between font-bold text-base mb-4 text-zinc-900 dark:text-white">
                 <span>Total deste envio</span>
@@ -216,7 +217,16 @@
         let categoriaAtiva = "CHURRASCOS";
         let carrinho = [];
 
-        // Alternar Tema Global (Fundo Inteiro)
+        // Chave salva no navegador para reconhecer a mesa deste aparelho específico
+        function obterMesaSalvaNoDispositivo(numMesa) {
+            return localStorage.getItem('bb_mesa_token_' + numMesa);
+        }
+
+        function salvarMesaNoDispositivo(numMesa) {
+            const token = 'token_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('bb_mesa_token_' + numMesa, token);
+        }
+
         function alternarTema() {
             const html = document.documentElement;
             const icone = document.getElementById('icone-tema');
@@ -252,19 +262,17 @@
             }
         }
 
-        // Carrega o grid de mesas checando no Firebase quais estão ocupadas
+        // Verifica o status correto de ocupado e se o aparelho tem permissão
         async function iniciarGridMesas() {
             const grid = document.getElementById('grid-mesas');
             grid.innerHTML = `<p class="col-span-5 text-center text-xs text-zinc-400 py-6">Verificando mesas...</p>`;
 
             try {
-                // Busca comandas ativas no Firestore
                 const snapshot = await db.collection('comandas').get();
                 const mesasOcupadas = {};
                 
                 snapshot.forEach(doc => {
                     const dados = doc.data();
-                    // Considera ocupada se tiver itens e total > 0
                     if (dados.itens && dados.itens.length > 0) {
                         mesasOcupadas[doc.id] = true;
                     }
@@ -273,24 +281,27 @@
                 grid.innerHTML = '';
                 for (let i = 1; i <= 30; i++) {
                     const ocupada = mesasOcupadas[String(i)] || false;
-                    
-                    if (ocupada) {
+                    const temTokenNesteCelular = obterMesaSalvaNoDispositivo(i);
+
+                    if (ocupada && !temTokenNesteCelular) {
+                        // Ocupada por outro cliente/celular
                         grid.innerHTML += `
-                            <div onclick="tentarAbrirMesaOcupada(${i})" class="bg-red-500/10 dark:bg-red-950/30 border border-red-500/30 rounded-2xl p-2 flex flex-col items-center justify-center cursor-pointer opacity-80 hover:opacity-100 transition-all">
+                            <div onclick="tentarAbrirMesaOcupada(${i})" class="bg-red-500/10 dark:bg-red-950/35 border border-red-500/30 rounded-2xl p-2 flex flex-col items-center justify-center cursor-pointer opacity-80 hover:opacity-100 transition-all">
                                 <span class="font-black text-xs text-red-600 dark:text-red-400">Mesa ${i}</span>
                                 <span class="text-[9px] font-bold text-red-500 uppercase mt-0.5 tracking-tight">Ocupada</span>
                             </div>
                         `;
                     } else {
+                        // Livre ou pertence a este próprio celular
                         grid.innerHTML += `
                             <button onclick="selecionarMesa(${i})" class="bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 text-zinc-800 dark:text-zinc-200 font-bold py-3 rounded-2xl text-sm border border-zinc-200 dark:border-zinc-700/50 transition-all flex flex-col items-center justify-center">
                                 <span>${i}</span>
+                                ${ocupada ? '<span class="text-[8px] text-red-500 font-bold mt-0.5">Sua Mesa</span>' : ''}
                             </button>
                         `;
                     }
                 }
             } catch (err) {
-                // Caso ocorra erro de conexão, monta normal sem trava para não travar o cliente
                 grid.innerHTML = '';
                 for (let i = 1; i <= 30; i++) {
                     grid.innerHTML += `<button onclick="selecionarMesa(${i})" class="bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 text-white font-bold py-3 rounded-2xl text-sm border border-zinc-200 dark:border-zinc-700">${i}</button>`;
@@ -299,7 +310,7 @@
         }
 
         function tentarAbrirMesaOcupada(num) {
-            alert(`A Mesa ${num} já está ocupada por outros clientes!\nPor motivos de segurança e privacidade, não é possível acessar comandas de outras mesas. Caso seja sua mesa, por favor solicite ao garçom.`);
+            alert(`A Mesa ${num} já está ocupada por outros clientes!\nPor motivos de segurança e privacidade, não é possível acessar comandas de outras mesas.`);
         }
 
         function verificarMesaInicial() {
@@ -314,6 +325,7 @@
 
         function selecionarMesa(num) {
             mesaAtual = num;
+            salvarMesaNoDispositivo(num);
             document.getElementById('mesa-display').innerText = `Mesa ${mesaAtual} • Cardápio Digital`;
             document.getElementById('modal-mesa').classList.add('hidden');
         }
@@ -323,7 +335,7 @@
             iniciarGridMesas();
         }
 
-        // Histórico da Comanda no Firebase com privacidade
+        // Histórico da Comanda restrito estritamente à mesa atual do usuário
         async function abrirComandaModal() {
             if (!mesaAtual) return;
             document.getElementById('sub-comanda-mesa').innerText = `Mesa ${mesaAtual}`;
