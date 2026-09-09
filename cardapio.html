@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#121212" id="meta-theme-color">
-    <title>CARDÁPIO DIGITAL – B.B CHURRASCO</title>
+    <title>B.B CHURRASCO – Cardápio Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -17,109 +17,179 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         .cats::-webkit-scrollbar { display: none; }
+        /* Suavização de rolagem e efeitos */
+        html { scroll-behavior: smooth; }
     </style>
 </head>
-<body class="bg-zinc-100 text-zinc-900 dark:bg-[#0d0f12] dark:text-zinc-100 min-h-screen pb-36 transition-colors duration-300">
+<body class="bg-zinc-100 text-zinc-900 dark:bg-[#0a0c0f] dark:text-zinc-100 min-h-screen pb-40 transition-colors duration-300 font-sans">
 
-    <!-- Modal de Seleção de Mesa -->
-    <div id="modal-mesa" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 text-center shadow-2xl">
-            <h1 class="text-2xl font-black text-red-600 mb-1">B.B CHURRASCO</h1>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-5">Selecione o número da sua mesa:</p>
-            <div id="grid-mesas" class="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto mb-2 p-1">
+    <!-- Modal de Seleção de Mesa (PIN Seguro) -->
+    <div id="modal-mesa" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 text-center shadow-2xl animate-in fade-in duration-200">
+            <div class="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-4 sm:hidden"></div>
+            <h1 class="text-2xl font-black text-red-600 tracking-tight mb-1">B.B CHURRASCO</h1>
+            <p id="modal-mesa-titulo" class="text-xs text-zinc-500 dark:text-zinc-400 mb-5 font-medium">Selecione o número da sua mesa para iniciar:</p>
+            
+            <div id="grid-mesas" class="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto mb-2 p-1 pr-1">
                 <!-- Preenchido via JS -->
+            </div>
+
+            <!-- Bloco de Senha para Mesa Ocupada -->
+            <div id="bloco-senha-mesa" class="hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 text-left">
+                <p id="label-senha-instrucao" class="text-xs text-zinc-600 dark:text-zinc-300 mb-2 font-medium">Mesa Ocupada. Insira a senha de 4 dígitos:</p>
+                <input type="password" id="input-senha-mesa" maxlength="4" placeholder="••••" class="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-2xl p-3.5 text-center text-xl tracking-[0.5em] text-zinc-900 dark:text-white mb-3 focus:outline-none focus:border-red-600">
+                <div class="flex gap-2">
+                    <button onclick="voltarGridMesas()" class="w-1/2 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 text-zinc-700 dark:text-zinc-300 font-bold py-3 rounded-2xl text-xs transition-colors">Voltar</button>
+                    <button onclick="confirmarSenhaMesa()" class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-2xl text-xs shadow-lg shadow-red-600/30 transition-transform active:scale-95">Entrar na Mesa</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Modal: Histórico de Pedidos da Comanda -->
-    <div id="modal-comanda" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
+    <div id="modal-comanda" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
+            <div class="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h2 class="text-lg font-black text-zinc-900 dark:text-white">Comanda da Mesa</h2>
+                    <h2 class="text-base font-black text-zinc-900 dark:text-white">Comanda Consumida</h2>
                     <p id="sub-comanda-mesa" class="text-xs text-red-600 font-bold">Mesa --</p>
                 </div>
-                <button onclick="fecharComandaModal()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 font-bold">&times;</button>
+                <button onclick="fecharComandaModal()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 font-bold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">&times;</button>
             </div>
-            <p class="text-[11px] text-zinc-400 mb-3">Estes são os itens já registrados na comanda (não podem ser alterados para evitar fraudes).</p>
+            <p class="text-[11px] text-zinc-400 mb-3">Itens já confirmados e enviados para a cozinha.</p>
             <div id="lista-comanda-historico" class="space-y-2.5 max-h-60 overflow-y-auto mb-4 text-sm pr-1">
                 <!-- Preenchido via JS -->
             </div>
             <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3 flex justify-between items-center font-black text-base mb-4">
-                <span class="text-zinc-500 dark:text-zinc-400 text-xs">Total Consumido:</span>
+                <span class="text-zinc-500 dark:text-zinc-400 text-xs font-semibold">Total Acumulado:</span>
                 <span id="comanda-total-geral" class="text-red-600 text-lg">R$ 0,00</span>
             </div>
-            <button onclick="fecharComandaModal()" class="w-full bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold py-3 rounded-2xl text-sm transition-colors">Fechar</button>
+            <div class="flex gap-2">
+                <button onclick="pedirConta()" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition-transform active:scale-95 flex items-center justify-center gap-1.5">
+                    <span>🧾 Pedir a Conta</span>
+                </button>
+                <button onclick="fecharComandaModal()" class="w-1/2 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold py-3.5 rounded-2xl text-xs transition-colors">Voltar</button>
+            </div>
         </div>
     </div>
 
-    <!-- App Container -->
+    <!-- Modal: Informações / Rodapé do Estabelecimento -->
+    <div id="modal-info" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
+            <div class="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-4 sm:hidden"></div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-base font-black text-zinc-900 dark:text-white">Informações da Casa</h2>
+                <button onclick="fecharInfoModal()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 font-bold">&times;</button>
+            </div>
+            <div class="space-y-3.5 text-xs text-zinc-600 dark:text-zinc-300 mb-5">
+                <div class="bg-zinc-50 dark:bg-zinc-800/50 p-3.5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between">
+                    <div>
+                        <p class="font-bold text-zinc-900 dark:text-white text-xs">📶 Wi-Fi para Clientes</p>
+                        <p class="text-[11px] text-zinc-500 mt-0.5">Rede: <span class="font-semibold text-red-600">BB_CHURRASCO_CLIENTES</span></p>
+                    </div>
+                    <span class="font-mono bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 px-2.5 py-1 rounded-xl text-xs font-bold">churras10</span>
+                </div>
+                <div class="bg-zinc-50 dark:bg-zinc-800/50 p-3.5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800">
+                    <p class="font-bold text-zinc-900 dark:text-white text-xs mb-1">⏰ Horário de Funcionamento</p>
+                    <p class="text-[11px] text-zinc-500">Terça a Domingo: 17h00 às 23h30</p>
+                </div>
+                <div class="bg-zinc-50 dark:bg-zinc-800/50 p-3.5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800">
+                    <p class="font-bold text-zinc-900 dark:text-white text-xs mb-1">💳 Formas de Pagamento</p>
+                    <p class="text-[11px] text-zinc-500">Pix, Cartões de Crédito/Débito e Dinheiro.</p>
+                </div>
+            </div>
+            <button onclick="fecharInfoModal()" class="w-full bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold py-3.5 rounded-2xl text-sm transition-colors">Entendido</button>
+        </div>
+    </div>
+
+    <!-- App Container Principal -->
     <div id="app" class="max-w-md mx-auto p-4">
         
-        <!-- Cabeçalho com Botão de Tema e Comanda -->
-        <header class="bg-gradient-to-br from-red-600 to-red-700 p-5 rounded-3xl shadow-xl shadow-red-600/10 mb-4 text-white">
-            <div class="flex justify-between items-start mb-3">
+        <!-- Cabeçalho Moderno e Elegante -->
+        <header class="bg-gradient-to-br from-red-600 via-red-600 to-red-700 p-5 rounded-[2.5rem] shadow-xl shadow-red-600/15 mb-4 text-white relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+            
+            <div class="flex justify-between items-start mb-3.5">
                 <div>
-                    <h1 class="text-xl font-black tracking-tight">B.B CHURRASCO</h1>
-                    <p id="mesa-display" class="text-xs text-red-100 mt-0.5 font-medium">Mesa -- • Cardápio Digital</p>
+                    <h1 class="text-xl font-black tracking-tight drop-shadow-sm">B.B CHURRASCO</h1>
+                    <p id="mesa-display" class="text-xs text-red-100 mt-0.5 font-medium tracking-wide">Mesa -- • Cardápio Digital</p>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <!-- Botão Alternar Tema Fundo Completo -->
+                    <!-- Botão Alternar Tema -->
                     <button onclick="alternarTema()" class="bg-black/20 hover:bg-black/30 w-9 h-9 rounded-2xl flex items-center justify-center backdrop-blur-md text-sm transition-transform active:scale-95" title="Mudar Tema">
                         <span id="icone-tema">☀️</span>
                     </button>
                     <!-- Botão Trocar Mesa -->
-                    <button onclick="mudarMesa()" class="bg-black/20 hover:bg-black/30 text-xs px-3 h-9 rounded-2xl font-bold backdrop-blur-md transition-transform active:scale-95">Trocar Mesa</button>
+                    <button onclick="mudarMesa()" class="bg-black/20 hover:bg-black/30 text-xs px-3 h-9 rounded-2xl font-bold backdrop-blur-md transition-transform active:scale-95">Mudar Mesa</button>
                 </div>
             </div>
             
-            <!-- Botão para ver itens já confirmados na comanda -->
-            <button onclick="abrirComandaModal()" class="w-full mt-1 bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-bold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-2 backdrop-blur-sm transition-all">
-                <span>📋 Ver Itens Já Pedidos/Confirmados</span>
-            </button>
+            <!-- Barra de Ações Rápidas do Topo -->
+            <div class="grid grid-cols-2 gap-2 mt-2">
+                <button onclick="abrirComandaModal()" class="bg-white/10 hover:bg-white/25 border border-white/10 text-white text-[11px] font-bold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-1.5 backdrop-blur-sm transition-all active:scale-95">
+                    <span>📋 Ver Comanda</span>
+                </button>
+                <button onclick="abrirInfoModal()" class="bg-white/10 hover:bg-white/25 border border-white/10 text-white text-[11px] font-bold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-1.5 backdrop-blur-sm transition-all active:scale-95">
+                    <span>ℹ️ Wi-Fi / Info</span>
+                </button>
+            </div>
         </header>
 
         <!-- Campo Identificação do Cliente -->
         <div class="mb-4">
-            <input type="text" id="nome-cliente" placeholder="Seu Nome / Apelido (Opcional)" class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3.5 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:border-red-600 text-sm shadow-sm">
+            <input type="text" id="nome-cliente" placeholder="Seu Nome / Apelido (Opcional)" class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3.5 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:border-red-600 text-xs font-medium shadow-sm transition-all">
         </div>
 
-        <!-- Categorias (Abas Horizontais) -->
-        <div id="categorias-container" class="flex gap-2 overflow-x-auto pb-3 mb-2 cats scrollbar-none">
-            <!-- Preenchido via JS -->
+        <!-- Categorias (Abas Superiores Flutuantes) -->
+        <div class="sticky top-2 z-30 bg-zinc-100/90 dark:bg-[#0a0c0f]/90 backdrop-blur-md pt-1 pb-3 -mx-4 px-4 mb-2">
+            <div id="categorias-container" class="flex gap-2 overflow-x-auto pb-1 cats scrollbar-none">
+                <!-- Preenchido via JS -->
+            </div>
         </div>
 
         <!-- Lista de Produtos -->
         <div id="produtos-container" class="space-y-3">
             <!-- Preenchido via JS -->
         </div>
+
+        <!-- Rodapé Institucional Discreto -->
+        <div class="mt-10 pt-6 border-t border-zinc-200 dark:border-zinc-800 text-center">
+            <p class="text-xs font-black text-red-600 tracking-tight">B.B CHURRASCO</p>
+            <p class="text-[11px] text-zinc-400 mt-1">O melhor espeto e caranguejo da região.</p>
+        </div>
     </div>
 
     <!-- Barra Inferior do Carrinho Atual -->
-    <div id="carrinho-bar" class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-zinc-950/95 border-t border-zinc-200 dark:border-zinc-800 p-4 backdrop-blur-md max-w-md mx-auto hidden z-40 shadow-2xl rounded-t-3xl">
+    <div id="carrinho-bar" class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-950/95 border-t border-zinc-200 dark:border-zinc-800 p-4 backdrop-blur-xl max-w-md mx-auto hidden z-40 shadow-[0_-10px_25px_rgba(0,0,0,0.1)] rounded-t-[2.5rem]">
         <div class="flex justify-between items-center mb-3">
             <span class="text-xs text-zinc-500 font-medium"><span id="total-itens" class="font-bold text-zinc-800 dark:text-zinc-200">0</span> itens selecionados</span>
             <span id="total-valor" class="text-base font-black text-red-600">R$ 0,00</span>
         </div>
-        <button onclick="abrirResumo()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-red-600/30 text-sm transition-transform active:scale-95">Ver Pedido e Enviar</button>
+        <button onclick="abrirResumo()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-red-600/30 text-xs transition-transform active:scale-95 flex items-center justify-center gap-2">
+            <span>Ver Pedido e Enviar</span>
+            <span class="bg-white/20 px-2 py-0.5 rounded-full text-[10px]" id="badge-qtd-barra">0</span>
+        </button>
     </div>
 
     <!-- Modal de Resumo do Pedido Atual -->
     <div id="modal-resumo" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
-        <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
+        <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
+            <div class="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             <div class="flex justify-between items-center mb-3">
                 <h2 id="modal-titulo" class="text-base font-black text-zinc-900 dark:text-white">Confirme seu Pedido</h2>
                 <button onclick="fecharResumo()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 font-bold">&times;</button>
             </div>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-3">Após enviar, os novos itens vão para a comanda e não poderão ser removidos por aqui.</p>
-            <div id="lista-carrinho" class="space-y-2 max-h-56 overflow-y-auto mb-3 text-sm pr-1"></div>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-3 leading-relaxed">Após enviar, os itens vão direto para a comanda da mesa e serão preparados.</p>
+            <div id="lista-carrinho" class="space-y-2 max-h-52 overflow-y-auto mb-3 text-sm pr-1"></div>
             <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3 flex justify-between font-bold text-base mb-4 text-zinc-900 dark:text-white">
-                <span>Total deste envio</span>
+                <span class="text-xs text-zinc-500 font-medium">Total deste envio:</span>
                 <span id="modal-total" class="text-red-600">R$ 0,00</span>
             </div>
-            <button onclick="enviarPedidoFirebase()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl mb-2 text-sm shadow-lg shadow-red-600/30 transition-transform active:scale-95">🚀 Enviar Pedido para a Cozinha</button>
-            <button onclick="fecharResumo()" class="w-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold py-3 rounded-2xl text-sm transition-colors">Continuar escolhendo</button>
+            <button onclick="enviarPedidoFirebase()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl mb-2 text-xs shadow-lg shadow-red-600/30 transition-transform active:scale-95 flex items-center justify-center gap-1.5">
+                <span>🚀 Enviar Pedido para a Cozinha</span>
+            </button>
+            <button onclick="fecharResumo()" class="w-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold py-3 rounded-2xl text-xs transition-colors">Continuar escolhendo</button>
         </div>
     </div>
 
@@ -214,17 +284,16 @@
         };
 
         let mesaAtual = null;
+        let mesaSelecionadaParaValidar = null;
         let categoriaAtiva = "CHURRASCOS";
         let carrinho = [];
 
-        // Chave salva no navegador para reconhecer a mesa deste aparelho específico
-        function obterMesaSalvaNoDispositivo(numMesa) {
-            return localStorage.getItem('bb_mesa_token_' + numMesa);
+        function obterSenhaSalva(numMesa) {
+            return localStorage.getItem('bb_senha_mesa_' + numMesa);
         }
 
-        function salvarMesaNoDispositivo(numMesa) {
-            const token = 'token_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('bb_mesa_token_' + numMesa, token);
+        function salvarSenhaNoDispositivo(numMesa, senha) {
+            localStorage.setItem('bb_senha_mesa_' + numMesa, senha);
         }
 
         function alternarTema() {
@@ -241,7 +310,7 @@
                 html.classList.add('dark');
                 localStorage.setItem('bb_tema', 'dark');
                 icone.innerText = '☀️';
-                metaTheme.setAttribute('content', '#121212');
+                metaTheme.setAttribute('content', '#0a0c0f');
             }
         }
 
@@ -258,14 +327,16 @@
             } else {
                 html.classList.add('dark');
                 icone.innerText = '☀️';
-                metaTheme.setAttribute('content', '#121212');
+                metaTheme.setAttribute('content', '#0a0c0f');
             }
         }
 
-        // Verifica o status correto de ocupado e se o aparelho tem permissão
         async function iniciarGridMesas() {
             const grid = document.getElementById('grid-mesas');
-            grid.innerHTML = `<p class="col-span-5 text-center text-xs text-zinc-400 py-6">Verificando mesas...</p>`;
+            document.getElementById('bloco-senha-mesa').classList.add('hidden');
+            document.getElementById('modal-mesa-titulo').innerText = "Selecione o número da sua mesa:";
+            grid.classList.remove('hidden');
+            grid.innerHTML = `<p class="col-span-5 text-center text-xs text-zinc-400 py-6">Carregando mesas...</p>`;
 
             try {
                 const snapshot = await db.collection('comandas').get();
@@ -281,22 +352,18 @@
                 grid.innerHTML = '';
                 for (let i = 1; i <= 30; i++) {
                     const ocupada = mesasOcupadas[String(i)] || false;
-                    const temTokenNesteCelular = obterMesaSalvaNoDispositivo(i);
 
-                    if (ocupada && !temTokenNesteCelular) {
-                        // Ocupada por outro cliente/celular
+                    if (ocupada) {
                         grid.innerHTML += `
-                            <div onclick="tentarAbrirMesaOcupada(${i})" class="bg-red-500/10 dark:bg-red-950/35 border border-red-500/30 rounded-2xl p-2 flex flex-col items-center justify-center cursor-pointer opacity-80 hover:opacity-100 transition-all">
-                                <span class="font-black text-xs text-red-600 dark:text-red-400">Mesa ${i}</span>
-                                <span class="text-[9px] font-bold text-red-500 uppercase mt-0.5 tracking-tight">Ocupada</span>
-                            </div>
+                            <button onclick="clicarMesa(${i}, true)" class="bg-red-500/10 dark:bg-red-950/40 hover:bg-red-600 hover:text-white border border-red-500/30 rounded-2xl p-2.5 flex flex-col items-center justify-center transition-all group active:scale-95">
+                                <span class="font-black text-sm text-red-600 dark:text-red-400 group-hover:text-white">${i}</span>
+                                <span class="text-[9px] font-bold text-red-500 group-hover:text-white uppercase mt-0.5 tracking-tight">Ocupada</span>
+                            </button>
                         `;
                     } else {
-                        // Livre ou pertence a este próprio celular
                         grid.innerHTML += `
-                            <button onclick="selecionarMesa(${i})" class="bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 text-zinc-800 dark:text-zinc-200 font-bold py-3 rounded-2xl text-sm border border-zinc-200 dark:border-zinc-700/50 transition-all flex flex-col items-center justify-center">
-                                <span>${i}</span>
-                                ${ocupada ? '<span class="text-[8px] text-red-500 font-bold mt-0.5">Sua Mesa</span>' : ''}
+                            <button onclick="clicarMesa(${i}, false)" class="bg-zinc-100 dark:bg-zinc-800/80 hover:bg-red-600 hover:text-white text-zinc-800 dark:text-zinc-200 font-bold py-3.5 rounded-2xl text-sm border border-zinc-200 dark:border-zinc-700/50 transition-all flex flex-col items-center justify-center active:scale-95">
+                                <span class="text-sm">${i}</span>
                             </button>
                         `;
                     }
@@ -304,28 +371,84 @@
             } catch (err) {
                 grid.innerHTML = '';
                 for (let i = 1; i <= 30; i++) {
-                    grid.innerHTML += `<button onclick="selecionarMesa(${i})" class="bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 text-white font-bold py-3 rounded-2xl text-sm border border-zinc-200 dark:border-zinc-700">${i}</button>`;
+                    grid.innerHTML += `<button onclick="clicarMesa(${i}, false)" class="bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 text-white font-bold py-3.5 rounded-2xl text-sm border border-zinc-200 dark:border-zinc-700">${i}</button>`;
                 }
             }
         }
 
-        function tentarAbrirMesaOcupada(num) {
-            alert(`A Mesa ${num} já está ocupada por outros clientes!\nPor motivos de segurança e privacidade, não é possível acessar comandas de outras mesas.`);
+        async function clicarMesa(num, ocupada) {
+            mesaSelecionadaParaValidar = num;
+
+            if (!ocupada) {
+                const novaSenha = Math.floor(1000 + Math.random() * 9000).toString();
+                salvarSenhaNoDispositivo(num, novaSenha);
+                
+                try {
+                    const comandaRef = db.collection('comandas').doc(String(num));
+                    const doc = await comandaRef.get();
+                    if (!doc.exists || !doc.data().senhaMesa) {
+                        await comandaRef.set({ senhaMesa: novaSenha }, { merge: true });
+                    }
+                } catch(e) {}
+
+                selecionarMesaFinal(num);
+            } else {
+                const senhaSalva = obterSenhaSalva(num);
+                if (senhaSalva) {
+                    selecionarMesaFinal(num);
+                } else {
+                    document.getElementById('grid-mesas').classList.add('hidden');
+                    document.getElementById('modal-mesa-titulo').innerText = `Mesa ${num} está Ocupada`;
+                    document.getElementById('input-senha-mesa').value = '';
+                    document.getElementById('bloco-senha-mesa').classList.remove('hidden');
+                    document.getElementById('input-senha-mesa').focus();
+                }
+            }
+        }
+
+        async function confirmarSenhaMesa() {
+            const senhaDigitada = document.getElementById('input-senha-mesa').value.trim();
+            if (senhaDigitada.length !== 4) {
+                alert('Digite a senha de 4 dígitos da mesa.');
+                return;
+            }
+
+            try {
+                const comandaRef = db.collection('comandas').doc(String(mesaSelecionadaParaValidar));
+                const doc = await comandaRef.get();
+
+                if (doc.exists) {
+                    const senhaCadastrada = doc.data().senhaMesa;
+                    if (!senhaCadastrada || senhaCadastrada === senhaDigitada) {
+                        salvarSenhaNoDispositivo(mesaSelecionadaParaValidar, senhaDigitada);
+                        selecionarMesaFinal(mesaSelecionadaParaValidar);
+                    } else {
+                        alert('Senha incorreta! Verifique com alguém na mesa o PIN de acesso.');
+                    }
+                } else {
+                    selecionarMesaFinal(mesaSelecionadaParaValidar);
+                }
+            } catch (err) {
+                alert('Erro ao validar senha.');
+            }
+        }
+
+        function voltarGridMesas() {
+            iniciarGridMesas();
         }
 
         function verificarMesaInicial() {
             const urlParams = new URLSearchParams(window.location.search);
             const mesaUrl = urlParams.get('mesa');
             if (mesaUrl && mesaUrl >= 1 && mesaUrl <= 30) {
-                selecionarMesa(mesaUrl);
+                clicarMesa(mesaUrl, false);
             } else {
                 iniciarGridMesas();
             }
         }
 
-        function selecionarMesa(num) {
+        function selecionarMesaFinal(num) {
             mesaAtual = num;
-            salvarMesaNoDispositivo(num);
             document.getElementById('mesa-display').innerText = `Mesa ${mesaAtual} • Cardápio Digital`;
             document.getElementById('modal-mesa').classList.add('hidden');
         }
@@ -335,7 +458,6 @@
             iniciarGridMesas();
         }
 
-        // Histórico da Comanda restrito estritamente à mesa atual do usuário
         async function abrirComandaModal() {
             if (!mesaAtual) return;
             document.getElementById('sub-comanda-mesa').innerText = `Mesa ${mesaAtual}`;
@@ -362,7 +484,7 @@
                     totalGeral += subtotal;
                     const clienteTag = i.cliente ? `<span class="text-[10px] bg-red-500/10 text-red-500 px-1.5 py-0.5 rounded-md ml-1 font-semibold">${i.cliente}</span>` : '';
                     return `
-                        <div class="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800 text-xs">
+                        <div class="flex justify-between items-center py-2.5 border-b border-zinc-100 dark:border-zinc-800 text-xs">
                             <div>
                                 <span class="font-bold text-zinc-800 dark:text-zinc-200">${i.qtd}x ${i.nome}</span>
                                 ${clienteTag}
@@ -382,10 +504,32 @@
             document.getElementById('modal-comanda').classList.add('hidden');
         }
 
+        function abrirInfoModal() {
+            document.getElementById('modal-info').classList.remove('hidden');
+        }
+
+        function fecharInfoModal() {
+            document.getElementById('modal-info').classList.add('hidden');
+        }
+
+        async function pedirConta() {
+            if (!mesaAtual) return;
+            if (confirm(`Deseja realmente solicitar o fechamento da conta da Mesa ${mesaAtual}? O garçom será avisado.`)) {
+                try {
+                    const comandaRef = db.collection('comandas').doc(String(mesaAtual));
+                    await comandaRef.set({ contaSolicitada: true, solicitadoEm: Date.now() }, { merge: true });
+                    alert('Conta solicitada com sucesso! O garçom já foi avisado e irá até a sua mesa.');
+                    fecharComandaModal();
+                } catch(e) {
+                    alert('Erro ao solicitar conta. Chame o garçom diretamente.');
+                }
+            }
+        }
+
         function renderizarCategorias() {
             const container = document.getElementById('categorias-container');
             container.innerHTML = Object.keys(cardapio).map(cat => `
-                <button onclick="mudarCategoria('${cat}')" class="whitespace-nowrap px-4 py-2.5 rounded-2xl font-bold text-xs border transition-all ${cat === categoriaAtiva ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20' : 'bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'}">${cat}</button>
+                <button onclick="mudarCategoria('${cat}')" class="whitespace-nowrap px-4 py-2.5 rounded-2xl font-bold text-xs border transition-all active:scale-95 ${cat === categoriaAtiva ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/25' : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'}">${cat}</button>
             `).join('');
         }
 
@@ -404,11 +548,11 @@
                 const qtd = itemCarrinho ? itemCarrinho.qtd : 0;
 
                 return `
-                    <div class="bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 p-4 rounded-3xl flex justify-between items-center shadow-sm">
-                        <div class="pr-2">
-                            <h3 class="font-bold text-zinc-900 dark:text-white text-sm">${nome}</h3>
+                    <div class="bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 p-4 rounded-3xl flex justify-between items-center shadow-sm hover:border-red-500/30 transition-all">
+                        <div class="pr-3">
+                            <h3 class="font-bold text-zinc-900 dark:text-white text-sm tracking-tight">${nome}</h3>
                             <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">${desc}</p>
-                            <span class="text-red-600 font-black text-sm mt-1.5 block">R$ ${preco.toFixed(2).replace('.', ',')}</span>
+                            <span class="text-red-600 font-black text-sm mt-2 block">R$ ${preco.toFixed(2).replace('.', ',')}</span>
                         </div>
                         <div class="flex items-center gap-2 bg-zinc-100 dark:bg-black/40 p-1.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shrink-0">
                             <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, -1)" class="w-8 h-8 rounded-xl bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 font-bold flex items-center justify-center shadow-sm active:scale-90 transition-transform">-</button>
@@ -446,6 +590,7 @@
 
             document.getElementById('total-itens').innerText = totalQtd;
             document.getElementById('total-valor').innerText = `R$ ${totalVal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('badge-qtd-barra').innerText = totalQtd;
 
             const bar = document.getElementById('carrinho-bar');
             if (totalQtd > 0) {
@@ -492,6 +637,7 @@
                 let totalExistente = 0;
                 let garcomAtual = "Hebster";
                 let criadoEmOriginal = Date.now();
+                let senhaMesaAtual = obterSenhaSalva(mesaAtual);
 
                 if (doc.exists) {
                     const dados = doc.data();
@@ -499,6 +645,7 @@
                     totalExistente = dados.total || 0;
                     garcomAtual = dados.garcom || "Hebster";
                     criadoEmOriginal = dados.criadoEm || Date.now();
+                    if (dados.senhaMesa) senhaMesaAtual = dados.senhaMesa;
                 }
 
                 const novosItensFormatados = carrinho.map(i => ({
@@ -517,10 +664,11 @@
                     itens: itensCombinados,
                     total: novoTotal,
                     criadoEm: criadoEmOriginal,
-                    atualizadoEm: Date.now()
+                    atualizadoEm: Date.now(),
+                    senhaMesa: senhaMesaAtual
                 }, { merge: true });
 
-                alert('Pedido enviado com sucesso para a comanda da mesa!');
+                alert('Pedido enviado com sucesso para a cozinha!');
                 
                 carrinho = [];
                 renderizarProdutos();
@@ -531,7 +679,7 @@
             }
         }
 
-        // Inicialização inicial
+        // Inicialização
         carregarTemaSalvo();
         verificarMesaInicial();
         renderizarCategorias();
