@@ -6,87 +6,120 @@
     <meta name="theme-color" content="#121212">
     <title>CARDÁPIO DIGITAL – B.B CHURRASCO</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        :root {
-            --brand: #ef4444;
-            --brand-hover: #dc2626;
-            --ink: #f3f4f6;
-            --bg: #0d0f12;
-            --card: rgba(30, 32, 38, 0.75);
-            --border: rgba(255, 255, 255, 0.08);
-            --muted: #9ca3af;
-            --input-bg: rgba(20, 22, 27, 0.8);
-        }
-        body { background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, sans-serif; padding-bottom: 140px; }
         .cats::-webkit-scrollbar { display: none; }
+        transition-custom { transition: all 0.25s ease-in-out; }
     </style>
 </head>
-<body class="min-h-screen">
-    <!-- Seletor de 30 Mesas (Modal Inicial caso não haja mesa na URL) -->
-    <div id="modal-mesa" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 w-full max-w-md rounded-3xl p-6 border border-white/10 text-center">
-            <h1 class="text-2xl font-black text-red-500 mb-2">B.B CHURRASCO</h1>
-            <p class="text-sm text-gray-300 mb-6">Selecione o número da sua mesa para ver o cardápio:</p>
-            <div id="grid-mesas" class="grid grid-cols-5 gap-2.5 max-h-72 overflow-y-auto mb-4 p-1">
+<body class="bg-zinc-950 text-zinc-100 dark:bg-[#0d0f12] dark:text-zinc-100 min-h-screen pb-36 transition-colors duration-300" id="corpo-pagina">
+
+    <!-- Modal de Seleção de Mesa -->
+    <div id="modal-mesa" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 text-center shadow-2xl">
+            <h1 class="text-2xl font-black text-red-600 mb-1">B.B CHURRASCO</h1>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-5">Selecione o número da sua mesa para ver o cardápio:</p>
+            <div id="grid-mesas" class="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto mb-2 p-1">
                 <!-- Preenchido via JS -->
             </div>
         </div>
     </div>
 
-    <div id="app" class="max-w-md mx-auto p-4">
-        <!-- Cabeçalho -->
-        <header class="bg-gradient-to-r from-red-600 to-red-700 p-4 rounded-2xl shadow-lg mb-4 text-white flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-black tracking-wide">B.B CHURRASCO</h1>
-                <p id="mesa-display" class="text-xs text-red-100 mt-0.5">Mesa -- • Cardápio Digital</p>
+    <!-- Modal: Histórico de Pedidos da Comanda -->
+    <div id="modal-comanda" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-lg font-black text-zinc-900 dark:text-white">Comanda da Mesa</h2>
+                    <p id="sub-comanda-mesa" class="text-xs text-red-600 font-bold">Mesa --</p>
+                </div>
+                <button onclick="fecharComandaModal()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 font-bold">&times;</button>
             </div>
-            <button onclick="mudarMesa()" class="bg-black/20 hover:bg-black/40 text-xs px-3 py-1.5 rounded-xl font-bold backdrop-blur-md">Trocar Mesa</button>
+            <div id="lista-comanda-historico" class="space-y-2.5 max-h-72 overflow-y-auto mb-4 text-sm pr-1">
+                <!-- Preenchido via JS -->
+            </div>
+            <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3 flex justify-between items-center font-black text-base mb-4">
+                <span class="text-zinc-500 dark:text-zinc-400 text-xs">Total Consumido:</span>
+                <span id="comanda-total-geral" class="text-red-600 text-lg">R$ 0,00</span>
+            </div>
+            <button onclick="fecharComandaModal()" class="w-full bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold py-3 rounded-2xl text-sm transition-colors">Fechar</button>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="app" class="max-w-md mx-auto p-4">
+        
+        <!-- Cabeçalho com Botão de Tema e Comanda -->
+        <header class="bg-gradient-to-br from-red-600 to-red-700 p-5 rounded-3xl shadow-xl shadow-red-600/10 mb-4 text-white">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <h1 class="text-xl font-black tracking-tight">B.B CHURRASCO</h1>
+                    <p id="mesa-display" class="text-xs text-red-100 mt-0.5 font-medium">Mesa -- • Cardápio Digital</p>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <!-- Botão Alternar Tema -->
+                    <button onclick="alternarTema()" class="bg-black/20 hover:bg-black/30 w-9 h-9 rounded-2xl flex items-center justify-center backdrop-blur-md text-sm transition-transform active:scale-95" title="Mudar Tema">
+                        <span id="icone-tema">☀️</span>
+                    </button>
+                    <!-- Botão Trocar Mesa -->
+                    <button onclick="mudarMesa()" class="bg-black/20 hover:bg-black/30 text-xs px-3 h-9 rounded-2xl font-bold backdrop-blur-md transition-transform active:scale-95">Trocar Mesa</button>
+                </div>
+            </div>
+            
+            <!-- Botão para ver itens já confirmados na comanda -->
+            <button onclick="abrirComandaModal()" class="w-full mt-1 bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-bold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-2 backdrop-blur-sm transition-all">
+                <span>📋 Ver Itens Já Pedidos/Confirmados</span>
+            </button>
         </header>
 
-        <!-- Identificação do Cliente -->
+        <!-- Campo Identificação do Cliente -->
         <div class="mb-4">
-            <input type="text" id="nome-cliente" placeholder="Seu Nome / Apelido" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 text-sm">
+            <input type="text" id="nome-cliente" placeholder="Seu Nome / Apelido (Opcional)" class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3.5 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:border-red-600 text-sm shadow-sm">
         </div>
 
-        <!-- Categorias Estilizadas (Abas Horizontais) -->
+        <!-- Categorias (Abas Horizontais) -->
         <div id="categorias-container" class="flex gap-2 overflow-x-auto pb-3 mb-2 cats scrollbar-none">
             <!-- Preenchido via JS -->
         </div>
 
-        <!-- Lista de Produtos da Categoria Atual -->
+        <!-- Lista de Produtos -->
         <div id="produtos-container" class="space-y-3">
             <!-- Preenchido via JS -->
         </div>
     </div>
 
-    <!-- Barra Inferior do Carrinho -->
-    <div id="carrinho-bar" class="fixed bottom-0 left-0 right-0 bg-zinc-950/95 border-t border-white/10 p-4 backdrop-blur-md max-w-md mx-auto hidden z-40">
+    <!-- Barra Inferior do Carrinho Atual -->
+    <div id="carrinho-bar" class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-zinc-950/95 border-t border-zinc-200 dark:border-zinc-800 p-4 backdrop-blur-md max-w-md mx-auto hidden z-40 shadow-2xl rounded-t-3xl">
         <div class="flex justify-between items-center mb-3">
-            <span class="text-xs text-gray-400"><span id="total-itens">0</span> itens selecionados</span>
-            <span id="total-valor" class="text-base font-black text-white">R$ 0,00</span>
+            <span class="text-xs text-zinc-500 font-medium"><span id="total-itens" class="font-bold text-zinc-800 dark:text-zinc-200">0</span> itens selecionados</span>
+            <span id="total-valor" class="text-base font-black text-red-600">R$ 0,00</span>
         </div>
-        <button onclick="abrirResumo()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-red-600/20 text-sm">Ver Pedido e Enviar</button>
+        <button onclick="abrirResumo()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-red-600/30 text-sm transition-transform active:scale-95">Ver Pedido e Enviar</button>
     </div>
 
-    <!-- Modal de Resumo -->
-    <div id="modal-resumo" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
-        <div class="bg-zinc-900 w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 border border-white/10">
-            <div class="flex justify-between items-center mb-4">
-                <h2 id="modal-titulo" class="text-base font-black">Confirme seu Pedido</h2>
-                <button onclick="fecharResumo()" class="text-gray-400 text-xl font-bold">&times;</button>
+    <!-- Modal de Resumo do Pedido Atual -->
+    <div id="modal-resumo" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h2 id="modal-titulo" class="text-base font-black text-zinc-900 dark:text-white">Confirme seu Pedido</h2>
+                <button onclick="fecharResumo()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 font-bold">&times;</button>
             </div>
-            <p class="text-xs text-gray-400 mb-3">Após enviar, o pedido vai direto para a comanda da mesa. Para alterar depois, solicite ao garçom.</p>
-            <div id="lista-carrinho" class="space-y-2 max-h-60 overflow-y-auto mb-4 text-sm"></div>
-            <div class="border-t border-white/10 pt-3 flex justify-between font-bold text-base mb-4">
-                <span>Total</span>
-                <span id="modal-total">R$ 0,00</span>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-3">Após enviar, o pedido vai direto para a comanda da mesa.</p>
+            <div id="lista-carrinho" class="space-y-2 max-h-56 overflow-y-auto mb-3 text-sm pr-1"></div>
+            <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3 flex justify-between font-bold text-base mb-4 text-zinc-900 dark:text-white">
+                <span>Total deste envio</span>
+                <span id="modal-total" class="text-red-600">R$ 0,00</span>
             </div>
-            <button onclick="enviarPedidoFirebase()" class="w-full bg-red-600 text-white font-bold py-3.5 rounded-xl mb-2 text-sm shadow-lg shadow-red-600/20">🚀 Enviar Pedido para a Cozinha</button>
-            <button onclick="fecharResumo()" class="w-full bg-zinc-800 text-gray-300 font-bold py-3 rounded-xl text-sm">Continuar escolhendo</button>
+            <button onclick="enviarPedidoFirebase()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl mb-2 text-sm shadow-lg shadow-red-600/30 transition-transform active:scale-95">🚀 Enviar Pedido para a Cozinha</button>
+            <button onclick="fecharResumo()" class="w-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold py-3 rounded-2xl text-sm transition-colors">Continuar escolhendo</button>
         </div>
     </div>
 
@@ -106,7 +139,7 @@
         }
         const db = firebase.firestore();
 
-        // Cardápio completo extraído do sistema do garçom
+        // Cardápio completo com especificações corretas de embalagens e sem queijo no baião grande
         const cardapio = {
             "CHURRASCOS": [
                 ["Frango", 8, "Suculento espeto de frango"],
@@ -127,28 +160,28 @@
                 ["Brahma Chopp", 5, "Lata 350ml"],
                 ["Brahma Puro Malte", 5, "Lata 350ml"],
                 ["Império", 9, "Lata 350ml"],
-                ["Heineken", 9, "Lata Long Neck / 350ml"],
-                ["Corona Extra", 10, "Long Neck"],
-                ["Budweiser", 8, "Lata / Long Neck"],
-                ["Vinho", 8, "Taça / Dose de vinho"],
-                ["Caipirinha", 15, "Cachaça, limão e açúcar"],
+                ["Heineken", 9, "Long Neck 330ml"],
+                ["Corona Extra", 10, "Long Neck 330ml"],
+                ["Budweiser", 8, "Long Neck 330ml"],
+                ["Vinho", 8, "Taça / Dose"],
+                ["Caipirinha", 15, "Cachaça, limão e açúcar (Copo)"],
                 ["Energético Red bull", 12, "Lata 250ml"],
-                ["Kit gin", 80, "Gin rock’s / energético Baly / Gelo"],
-                ["Stella gold", 11, "Long Neck"],
-                ["Ice cabaré", 9, "Bebida mista"],
+                ["Kit gin", 80, "Gin rock’s / energético Baly / Gelo (Garrafa/Kit)"],
+                ["Stella gold", 11, "Long Neck 330ml"],
+                ["Ice cabaré", 9, "Long Neck 275ml"],
                 ["Balde Skol", 50, "Balde com várias unidades"],
                 ["Balde Brahma", 50, "Balde com várias unidades"],
-                ["Terça amarela", 7, "Cerveja lata"],
-                ["Terça prata", 6, "Cerveja lata"],
+                ["Terça amarela", 7, "Lata 350ml"],
+                ["Terça prata", 6, "Lata 350ml"],
                 ["Meio litro amarela", 16, "Garrafa 600ml"],
                 ["Meio litro prata", 15, "Garrafa 600ml"],
-                ["Litro da amarela", 35, "Litro gelado"],
-                ["Litro da prata", 30, "Litro gelado"]
+                ["Litro da amarela", 35, "Garrafa 1 Litro"],
+                ["Litro da prata", 30, "Garrafa 1 Litro"]
             ],
             "GUARNIÇÕES": [
                 ["Baião caseiro grande", 8, "Porção grande tradicional"],
                 ["Baião caseiro pequeno", 4, "Porção individual"],
-                ["Baião cremoso grande", 10, "Com queijo coalho e requeijão"],
+                ["Baião cremoso grande", 10, "Com requeijão cremoso"],
                 ["Baião cremoso pequeno", 5, "Individual cremoso"],
                 ["Feijão verde", 25, "Combo especial"],
                 ["Panelada", 18, "Acompanha arroz / farofa de cuscuz"]
@@ -183,14 +216,42 @@
 
         let mesaAtual = null;
         let categoriaAtiva = "CHURRASCOS";
-        let carrinho = []; // Armazena { nome, preco, qtd }
+        let carrinho = [];
 
-        // Inicialização das 30 mesas
+        // Gerenciamento de Tema (Claro / Escuro)
+        function alternarTema() {
+            const html = document.documentElement;
+            const icone = document.getElementById('icone-tema');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('bb_tema', 'light');
+                icone.innerText = '🌙';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('bb_tema', 'dark');
+                icone.innerText = '☀️';
+            }
+        }
+
+        function carregarTemaSalvo() {
+            const salvo = localStorage.getItem('bb_tema') || 'dark';
+            const html = document.documentElement;
+            const icone = document.getElementById('icone-tema');
+            if (salvo === 'light') {
+                html.classList.remove('dark');
+                icone.innerText = '🌙';
+            } else {
+                html.classList.add('dark');
+                icone.innerText = '☀️';
+            }
+        }
+
+        // Inicialização das Mesas
         function iniciarGridMesas() {
             const grid = document.getElementById('grid-mesas');
             grid.innerHTML = '';
             for (let i = 1; i <= 30; i++) {
-                grid.innerHTML += `<button onclick="selecionarMesa(${i})" class="bg-zinc-800 hover:bg-red-600 text-white font-bold py-3 rounded-xl text-sm border border-white/5 transition-colors">${i}</button>`;
+                grid.innerHTML += `<button onclick="selecionarMesa(${i})" class="bg-zinc-100 dark:bg-zinc-800 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 text-zinc-800 dark:text-zinc-200 font-bold py-3 rounded-2xl text-sm border border-zinc-200 dark:border-zinc-700/50 transition-all">${i}</button>`;
             }
         }
 
@@ -215,10 +276,57 @@
             iniciarGridMesas();
         }
 
+        // Histórico da Comanda no Firebase
+        async function abrirComandaModal() {
+            if (!mesaAtual) return;
+            document.getElementById('sub-comanda-mesa').innerText = `Mesa ${mesaAtual}`;
+            const listaEl = document.getElementById('lista-comanda-historico');
+            listaEl.innerHTML = `<p class="text-xs text-center text-zinc-400 py-4">Carregando comanda...</p>`;
+            document.getElementById('modal-comanda').classList.remove('hidden');
+
+            try {
+                const comandaRef = db.collection('comandas').doc(String(mesaAtual));
+                const doc = await comandaRef.get();
+
+                if (!doc.exists || !doc.data().itens || doc.data().itens.length === 0) {
+                    listaEl.innerHTML = `<p class="text-xs text-center text-zinc-400 py-4">Nenhum item confirmado na comanda ainda.</p>`;
+                    document.getElementById('comanda-total-geral').innerText = `R$ 0,00`;
+                    return;
+                }
+
+                const dados = doc.data();
+                const itens = dados.itens;
+                let totalGeral = 0;
+
+                listaEl.innerHTML = itens.map(i => {
+                    const subtotal = (i.preco || 0) * (i.qtd || 0);
+                    totalGeral += subtotal;
+                    const clienteTag = i.cliente ? `<span class="text-[10px] bg-red-500/10 text-red-500 px-1.5 py-0.5 rounded-md ml-1 font-semibold">${i.cliente}</span>` : '';
+                    return `
+                        <div class="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800 text-xs">
+                            <div>
+                                <span class="font-bold text-zinc-800 dark:text-zinc-200">${i.qtd}x ${i.nome}</span>
+                                ${clienteTag}
+                            </div>
+                            <span class="font-black text-zinc-900 dark:text-white">R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('comanda-total-geral').innerText = `R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
+            } catch (err) {
+                listaEl.innerHTML = `<p class="text-xs text-center text-red-500 py-4">Erro ao carregar comanda.</p>`;
+            }
+        }
+
+        function fecharComandaModal() {
+            document.getElementById('modal-comanda').classList.add('hidden');
+        }
+
         function renderizarCategorias() {
             const container = document.getElementById('categorias-container');
             container.innerHTML = Object.keys(cardapio).map(cat => `
-                <button onclick="mudarCategoria('${cat}')" class="whitespace-nowrap px-4 py-2 rounded-xl font-bold text-xs border transition-all ${cat === categoriaAtiva ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/20' : 'bg-zinc-900/60 text-gray-400 border-white/10 hover:border-white/20'}">${cat}</button>
+                <button onclick="mudarCategoria('${cat}')" class="whitespace-nowrap px-4 py-2.5 rounded-2xl font-bold text-xs border transition-all ${cat === categoriaAtiva ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20' : 'bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'}">${cat}</button>
             `).join('');
         }
 
@@ -237,16 +345,16 @@
                 const qtd = itemCarrinho ? itemCarrinho.qtd : 0;
 
                 return `
-                    <div class="bg-zinc-900/60 border border-white/10 p-4 rounded-2xl flex justify-between items-center">
+                    <div class="bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 p-4 rounded-3xl flex justify-between items-center shadow-sm">
                         <div class="pr-2">
-                            <h3 class="font-bold text-white text-sm">${nome}</h3>
-                            <p class="text-xs text-gray-400 mt-0.5">${desc}</p>
-                            <span class="text-red-400 font-bold text-sm mt-1.5 block">R$ ${preco.toFixed(2).replace('.', ',')}</span>
+                            <h3 class="font-bold text-zinc-900 dark:text-white text-sm">${nome}</h3>
+                            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">${desc}</p>
+                            <span class="text-red-600 font-black text-sm mt-1.5 block">R$ ${preco.toFixed(2).replace('.', ',')}</span>
                         </div>
-                        <div class="flex items-center gap-2 bg-black/40 p-1 rounded-xl border border-white/5 shrink-0">
-                            <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, -1)" class="w-8 h-8 rounded-lg bg-zinc-800 text-white font-bold flex items-center justify-center active:scale-90 transition-transform">-</button>
-                            <span id="qtd-${nome}" class="w-6 text-center font-bold text-sm text-white">${qtd}</span>
-                            <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, 1)" class="w-8 h-8 rounded-lg bg-red-600 text-white font-bold flex items-center justify-center active:scale-90 transition-transform">+</button>
+                        <div class="flex items-center gap-2 bg-zinc-100 dark:bg-black/40 p-1.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shrink-0">
+                            <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, -1)" class="w-8 h-8 rounded-xl bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 font-bold flex items-center justify-center shadow-sm active:scale-90 transition-transform">-</button>
+                            <span id="qtd-${nome}" class="w-6 text-center font-bold text-sm text-zinc-900 dark:text-white">${qtd}</span>
+                            <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, 1)" class="w-8 h-8 rounded-xl bg-red-600 text-white font-bold flex items-center justify-center shadow-md shadow-red-600/30 active:scale-90 transition-transform">+</button>
                         </div>
                     </div>
                 `;
@@ -264,7 +372,6 @@
                 carrinho.push({ nome, preco, qtd: delta });
             }
 
-            // Atualiza o número na tela sem perder o foco
             const elemQtd = document.getElementById(`qtd-${nome}`);
             if (elemQtd) {
                 const atualizado = carrinho.find(i => i.nome === nome);
@@ -298,9 +405,9 @@
                 const sub = item.preco * item.qtd;
                 total += sub;
                 lista.innerHTML += `
-                    <div class="flex justify-between items-center py-1.5 border-b border-white/5 text-sm">
-                        <span>${item.qtd}x ${item.nome}</span>
-                        <span class="font-bold text-white">R$ ${sub.toFixed(2).replace('.', ',')}</span>
+                    <div class="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800 text-xs">
+                        <span class="text-zinc-700 dark:text-zinc-300 font-medium">${item.qtd}x ${item.nome}</span>
+                        <span class="font-bold text-zinc-900 dark:text-white">R$ ${sub.toFixed(2).replace('.', ',')}</span>
                     </div>
                 `;
             });
@@ -319,7 +426,6 @@
             if (!carrinho.length || !mesaAtual) return;
 
             try {
-                // Busca a comanda atual da mesa no Firebase para somar os novos itens corretamente
                 const comandaRef = db.collection('comandas').doc(String(mesaAtual));
                 const doc = await comandaRef.get();
                 
@@ -336,7 +442,6 @@
                     criadoEmOriginal = dados.criadoEm || Date.now();
                 }
 
-                // Prepara os novos itens com o nome do cliente que fez o pedido
                 const novosItensFormatados = carrinho.map(i => ({
                     cliente: cliente,
                     nome: i.nome,
@@ -348,7 +453,6 @@
                 const valorAdicional = carrinho.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
                 const novoTotal = totalExistente + valorAdicional;
 
-                // Salva atualizado na coleção 'comandas' do Firebase
                 await comandaRef.set({
                     garcom: garcomAtual,
                     itens: itensCombinados,
@@ -359,7 +463,6 @@
 
                 alert('Pedido enviado com sucesso para a comanda da mesa!');
                 
-                // Limpa o carrinho do cliente
                 carrinho = [];
                 renderizarProdutos();
                 atualizarBarraCarrinho();
@@ -369,7 +472,8 @@
             }
         }
 
-        // Inicialização
+        // Inicialização inicial
+        carregarTemaSalvo();
         verificarMesaInicial();
         renderizarCategorias();
         renderizarProdutos();
