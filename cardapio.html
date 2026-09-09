@@ -22,6 +22,7 @@
             --input-bg: rgba(20, 22, 27, 0.8);
         }
         body { background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, sans-serif; padding-bottom: 140px; }
+        .cats::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -51,53 +52,14 @@
             <input type="text" id="nome-cliente" placeholder="Seu Nome / Apelido" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 text-sm">
         </div>
 
-        <!-- Categorias / Produtos -->
-        <div class="space-y-4">
-            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Cardápio</h2>
-            
-            <div class="space-y-3">
-                <!-- Item 1 -->
-                <div class="bg-zinc-900/60 border border-white/10 p-4 rounded-2xl flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-white text-sm">Frango na Brasa</h3>
-                        <p class="text-xs text-gray-400">Suculento espeto de frango</p>
-                        <span class="text-red-400 font-bold text-sm mt-1 block">R$ 8,00</span>
-                    </div>
-                    <div class="flex items-center gap-2 bg-black/40 p-1 rounded-xl border border-white/5">
-                        <button onclick="alterarQtd('Frango na Brasa', 8.00, -1)" class="w-8 h-8 rounded-lg bg-zinc-800 text-white font-bold flex items-center justify-center">-</button>
-                        <span id="qtd-Frango na Brasa" class="w-6 text-center font-bold text-sm">0</span>
-                        <button onclick="alterarQtd('Frango na Brasa', 8.00, 1)" class="w-8 h-8 rounded-lg bg-red-600 text-white font-bold flex items-center justify-center">+</button>
-                    </div>
-                </div>
+        <!-- Categorias Estilizadas (Abas Horizontais) -->
+        <div id="categorias-container" class="flex gap-2 overflow-x-auto pb-3 mb-2 cats scrollbar-none">
+            <!-- Preenchido via JS -->
+        </div>
 
-                <!-- Item 2 -->
-                <div class="bg-zinc-900/60 border border-white/10 p-4 rounded-2xl flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-white text-sm">Porco na Brasa</h3>
-                        <p class="text-xs text-gray-400">Espeto suíno temperado</p>
-                        <span class="text-red-400 font-bold text-sm mt-1 block">R$ 8,00</span>
-                    </div>
-                    <div class="flex items-center gap-2 bg-black/40 p-1 rounded-xl border border-white/5">
-                        <button onclick="alterarQtd('Porco na Brasa', 8.00, -1)" class="w-8 h-8 rounded-lg bg-zinc-800 text-white font-bold flex items-center justify-center">-</button>
-                        <span id="qtd-Porco na Brasa" class="w-6 text-center font-bold text-sm">0</span>
-                        <button onclick="alterarQtd('Porco na Brasa', 8.00, 1)" class="w-8 h-8 rounded-lg bg-red-600 text-white font-bold flex items-center justify-center">+</button>
-                    </div>
-                </div>
-
-                <!-- Item 3 -->
-                <div class="bg-zinc-900/60 border border-white/10 p-4 rounded-2xl flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-white text-sm">Coração de Frango</h3>
-                        <p class="text-xs text-gray-400">Corações selecionados</p>
-                        <span class="text-red-400 font-bold text-sm mt-1 block">R$ 10,00</span>
-                    </div>
-                    <div class="flex items-center gap-2 bg-black/40 p-1 rounded-xl border border-white/5">
-                        <button onclick="alterarQtd('Coração de Frango', 10.00, -1)" class="w-8 h-8 rounded-lg bg-zinc-800 text-white font-bold flex items-center justify-center">-</button>
-                        <span id="qtd-Coração de Frango" class="w-6 text-center font-bold text-sm">0</span>
-                        <button onclick="alterarQtd('Coração de Frango', 10.00, 1)" class="w-8 h-8 rounded-lg bg-red-600 text-white font-bold flex items-center justify-center">+</button>
-                    </div>
-                </div>
-            </div>
+        <!-- Lista de Produtos da Categoria Atual -->
+        <div id="produtos-container" class="space-y-3">
+            <!-- Preenchido via JS -->
         </div>
     </div>
 
@@ -130,12 +92,13 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_AUTH_DOMAIN",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_STORAGE_BUCKET",
-            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-            appId: "SUA_APP_ID"
+            apiKey: "AIzaSyBP_3bvi9PnViCPkIQqEdoF1I7BcItfHEY",
+            authDomain: "bbchurrasco-app.firebaseapp.com",
+            projectId: "bbchurrasco-app",
+            storageBucket: "bbchurrasco-app.firebasestorage.app",
+            messagingSenderId: "470656170967",
+            appId: "1:470656170967:web:f9c96614d411561ddfe992",
+            measurementId: "G-C0KJ5GJKG2"
         };
         
         if (!firebase.apps.length) {
@@ -143,8 +106,84 @@
         }
         const db = firebase.firestore();
 
+        // Cardápio completo extraído do sistema do garçom
+        const cardapio = {
+            "CHURRASCOS": [
+                ["Frango", 8, "Suculento espeto de frango"],
+                ["Porco", 8, "Espeto suíno temperado"],
+                ["Linguiça", 8, "Linguiça artesanal na brasa"],
+                ["Coração de frango", 8, "Corações selecionados"],
+                ["Coração de boi", 8, "Coração bovino grelhado"],
+                ["Carne", 8, "Espeto de carne bovina"],
+                ["Tripa", 8, "Tripa crocante na brasa"]
+            ],
+            "CARANGUEJO": [
+                ["Caranguejo Unidade", 8, "Unidade fresca ao leite de coco"],
+                ["Combo 4 Caranguejos", 28, "Combo promocional com 4 unidades"],
+                ["Caldo de Caranguejo", 5, "Caldo quentinho e temperado"]
+            ],
+            "BEBIDAS": [
+                ["Skol", 5, "Lata 350ml"],
+                ["Brahma Chopp", 5, "Lata 350ml"],
+                ["Brahma Puro Malte", 5, "Lata 350ml"],
+                ["Império", 9, "Lata 350ml"],
+                ["Heineken", 9, "Lata Long Neck / 350ml"],
+                ["Corona Extra", 10, "Long Neck"],
+                ["Budweiser", 8, "Lata / Long Neck"],
+                ["Vinho", 8, "Taça / Dose de vinho"],
+                ["Caipirinha", 15, "Cachaça, limão e açúcar"],
+                ["Energético Red bull", 12, "Lata 250ml"],
+                ["Kit gin", 80, "Gin rock’s / energético Baly / Gelo"],
+                ["Stella gold", 11, "Long Neck"],
+                ["Ice cabaré", 9, "Bebida mista"],
+                ["Balde Skol", 50, "Balde com várias unidades"],
+                ["Balde Brahma", 50, "Balde com várias unidades"],
+                ["Terça amarela", 7, "Cerveja lata"],
+                ["Terça prata", 6, "Cerveja lata"],
+                ["Meio litro amarela", 16, "Garrafa 600ml"],
+                ["Meio litro prata", 15, "Garrafa 600ml"],
+                ["Litro da amarela", 35, "Litro gelado"],
+                ["Litro da prata", 30, "Litro gelado"]
+            ],
+            "GUARNIÇÕES": [
+                ["Baião caseiro grande", 8, "Porção grande tradicional"],
+                ["Baião caseiro pequeno", 4, "Porção individual"],
+                ["Baião cremoso grande", 10, "Com queijo coalho e requeijão"],
+                ["Baião cremoso pequeno", 5, "Individual cremoso"],
+                ["Feijão verde", 25, "Combo especial"],
+                ["Panelada", 18, "Acompanha arroz / farofa de cuscuz"]
+            ],
+            "PETISCOS": [
+                ["Batata frita", 15, "Porção crocante"],
+                ["Calabresa acebolada", 15, "Com cebolas douradas"],
+                ["Camarão (porção)", 25, "Camarões selecionados"],
+                ["Bolinha carne do sol", 18, "Porção recheada"],
+                ["Bolinha de queijo", 15, "Crocante e derretida"]
+            ],
+            "REFRIGERANTES": [
+                ["Coca-Cola 1L", 8, "Garrafa 1 Litro"],
+                ["Guaraná 1L", 7, "Garrafa 1 Litro"],
+                ["Pepsi 1L", 7, "Garrafa 1 Litro"],
+                ["Coca-Cola lata", 5, "Lata 350ml"],
+                ["Fanta lata", 5, "Lata 350ml"],
+                ["Sprite lata", 6, "Lata 350ml"],
+                ["Água", 3, "Garrafa 500ml sem gás"],
+                ["Água com gás", 4, "Garrafa 500ml com gás"]
+            ],
+            "SUCOS": [
+                ["Suco Maracujá 400ml", 8, "Fruta natural da polpa"],
+                ["Suco Manga 400ml", 7, "Refrescante e cremoso"],
+                ["Suco Goiaba 400ml", 7, "Sabor natural"]
+            ],
+            "DIVERSOS": [
+                ["Cigarro", 7, "Carteira"],
+                ["Partilha halls", 3, "Unidade de pastilha"]
+            ]
+        };
+
         let mesaAtual = null;
-        let carrinho = [];
+        let categoriaAtiva = "CHURRASCOS";
+        let carrinho = []; // Armazena { nome, preco, qtd }
 
         // Inicialização das 30 mesas
         function iniciarGridMesas() {
@@ -176,6 +215,44 @@
             iniciarGridMesas();
         }
 
+        function renderizarCategorias() {
+            const container = document.getElementById('categorias-container');
+            container.innerHTML = Object.keys(cardapio).map(cat => `
+                <button onclick="mudarCategoria('${cat}')" class="whitespace-nowrap px-4 py-2 rounded-xl font-bold text-xs border transition-all ${cat === categoriaAtiva ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/20' : 'bg-zinc-900/60 text-gray-400 border-white/10 hover:border-white/20'}">${cat}</button>
+            `).join('');
+        }
+
+        function mudarCategoria(cat) {
+            categoriaAtiva = cat;
+            renderizarCategorias();
+            renderizarProdutos();
+        }
+
+        function renderizarProdutos() {
+            const container = document.getElementById('produtos-container');
+            const itens = cardapio[categoriaAtiva] || [];
+
+            container.innerHTML = itens.map(([nome, preco, desc]) => {
+                const itemCarrinho = carrinho.find(i => i.nome === nome);
+                const qtd = itemCarrinho ? itemCarrinho.qtd : 0;
+
+                return `
+                    <div class="bg-zinc-900/60 border border-white/10 p-4 rounded-2xl flex justify-between items-center">
+                        <div class="pr-2">
+                            <h3 class="font-bold text-white text-sm">${nome}</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">${desc}</p>
+                            <span class="text-red-400 font-bold text-sm mt-1.5 block">R$ ${preco.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-black/40 p-1 rounded-xl border border-white/5 shrink-0">
+                            <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, -1)" class="w-8 h-8 rounded-lg bg-zinc-800 text-white font-bold flex items-center justify-center active:scale-90 transition-transform">-</button>
+                            <span id="qtd-${nome}" class="w-6 text-center font-bold text-sm text-white">${qtd}</span>
+                            <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, 1)" class="w-8 h-8 rounded-lg bg-red-600 text-white font-bold flex items-center justify-center active:scale-90 transition-transform">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function alterarQtd(nome, preco, delta) {
             let item = carrinho.find(i => i.nome === nome);
             if (item) {
@@ -187,9 +264,12 @@
                 carrinho.push({ nome, preco, qtd: delta });
             }
 
-            const qtdAtual = item ? item.qtd : 0;
+            // Atualiza o número na tela sem perder o foco
             const elemQtd = document.getElementById(`qtd-${nome}`);
-            if (elemQtd) elemQtd.innerText = qtdAtual;
+            if (elemQtd) {
+                const atualizado = carrinho.find(i => i.nome === nome);
+                elemQtd.innerText = atualizado ? atualizado.qtd : 0;
+            }
 
             atualizarBarraCarrinho();
         }
@@ -217,7 +297,12 @@
             carrinho.forEach(item => {
                 const sub = item.preco * item.qtd;
                 total += sub;
-                lista.innerHTML += `<div class="flex justify-between items-center py-1.5 border-b border-white/5 text-sm"><span>${item.qtd}x ${item.nome}</span><span class="font-bold text-white">R$ ${sub.toFixed(2).replace('.', ',')}</span></div>`;
+                lista.innerHTML += `
+                    <div class="flex justify-between items-center py-1.5 border-b border-white/5 text-sm">
+                        <span>${item.qtd}x ${item.nome}</span>
+                        <span class="font-bold text-white">R$ ${sub.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                `;
             });
 
             document.getElementById('modal-titulo').innerText = `Mesa ${mesaAtual} — Seu Pedido`;
@@ -234,21 +319,49 @@
             if (!carrinho.length || !mesaAtual) return;
 
             try {
-                // Salva como um novo lançamento na comanda da mesa
-                await db.collection('pedidos').add({
-                    mesa: Number(mesaAtual),
-                    cliente: cliente,
-                    itens: carrinho,
-                    total: carrinho.reduce((sum, i) => sum + (i.preco * i.qtd), 0),
-                    status: 'pendente_garcom',
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                alert('Pedido enviado com sucesso! O garçom já foi avisado e o item foi adicionado à comanda.');
+                // Busca a comanda atual da mesa no Firebase para somar os novos itens corretamente
+                const comandaRef = db.collection('comandas').doc(String(mesaAtual));
+                const doc = await comandaRef.get();
                 
-                // Limpa o carrinho do cliente para novos pedidos (a comanda anterior fica salva no sistema do garçom)
+                let itensExistentes = [];
+                let totalExistente = 0;
+                let garcomAtual = "Hebster";
+                let criadoEmOriginal = Date.now();
+
+                if (doc.exists) {
+                    const dados = doc.data();
+                    itensExistentes = dados.itens || [];
+                    totalExistente = dados.total || 0;
+                    garcomAtual = dados.garcom || "Hebster";
+                    criadoEmOriginal = dados.criadoEm || Date.now();
+                }
+
+                // Prepara os novos itens com o nome do cliente que fez o pedido
+                const novosItensFormatados = carrinho.map(i => ({
+                    cliente: cliente,
+                    nome: i.nome,
+                    qtd: i.qtd,
+                    preco: i.preco
+                }));
+
+                const itensCombinados = [...itensExistentes, ...novosItensFormatados];
+                const valorAdicional = carrinho.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
+                const novoTotal = totalExistente + valorAdicional;
+
+                // Salva atualizado na coleção 'comandas' do Firebase
+                await comandaRef.set({
+                    garcom: garcomAtual,
+                    itens: itensCombinados,
+                    total: novoTotal,
+                    criadoEm: criadoEmOriginal,
+                    atualizadoEm: Date.now()
+                }, { merge: true });
+
+                alert('Pedido enviado com sucesso para a comanda da mesa!');
+                
+                // Limpa o carrinho do cliente
                 carrinho = [];
-                document.querySelectorAll('[id^="qtd-"]').forEach(el => el.innerText = '0');
+                renderizarProdutos();
                 atualizarBarraCarrinho();
                 fecharResumo();
             } catch (error) {
@@ -256,8 +369,10 @@
             }
         }
 
-        // Executa verificação ao carregar
+        // Inicialização
         verificarMesaInicial();
+        renderizarCategorias();
+        renderizarProdutos();
     </script>
 </body>
 </html>
