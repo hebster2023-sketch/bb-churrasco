@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
@@ -56,7 +56,7 @@
             <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Cardápio</h2>
             
             <div class="space-y-3">
-                <!-- Item 1 -->
+                <!-- Item 1: Frango -->
                 <div class="bg-zinc-900/60 border border-white/10 p-4 rounded-2xl flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-white text-sm">Frango na Brasa</h3>
@@ -70,7 +70,7 @@
                     </div>
                 </div>
 
-                <!-- Item 2 -->
+                <!-- Item 2: Porco -->
                 <div class="bg-zinc-900/60 border border-white/10 p-4 rounded-2xl flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-white text-sm">Porco na Brasa</h3>
@@ -84,7 +84,7 @@
                     </div>
                 </div>
 
-                <!-- Item 3 -->
+                <!-- Item 3: Coração -->
                 <div class="bg-zinc-900/60 border border-white/10 p-4 rounded-2xl flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-white text-sm">Coração de Frango</h3>
@@ -95,6 +95,34 @@
                         <button onclick="alterarQtd('Coração de Frango', 10.00, -1)" class="w-8 h-8 rounded-lg bg-zinc-800 text-white font-bold flex items-center justify-center">-</button>
                         <span id="qtd-Coração de Frango" class="w-6 text-center font-bold text-sm">0</span>
                         <button onclick="alterarQtd('Coração de Frango', 10.00, 1)" class="w-8 h-8 rounded-lg bg-red-600 text-white font-bold flex items-center justify-center">+</button>
+                    </div>
+                </div>
+
+                <!-- Item 4: Vinho (Atualizado para R$ 8,00) -->
+                <div class="bg-zinc-900/60 border border-white/10 p-4 rounded-2xl flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-white text-sm">Vinho</h3>
+                        <p class="text-xs text-gray-400">Taça / Dose de vinho</p>
+                        <span class="text-red-400 font-bold text-sm mt-1 block">R$ 8,00</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-black/40 p-1 rounded-xl border border-white/5">
+                        <button onclick="alterarQtd('Vinho', 8.00, -1)" class="w-8 h-8 rounded-lg bg-zinc-800 text-white font-bold flex items-center justify-center">-</button>
+                        <span id="qtd-Vinho" class="w-6 text-center font-bold text-sm">0</span>
+                        <button onclick="alterarQtd('Vinho', 8.00, 1)" class="w-8 h-8 rounded-lg bg-red-600 text-white font-bold flex items-center justify-center">+</button>
+                    </div>
+                </div>
+
+                <!-- Item 5: Energético Red Bull (Atualizado para R$ 12,00) -->
+                <div class="bg-zinc-900/60 border border-white/10 p-4 rounded-2xl flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-white text-sm">Energético Red Bull</h3>
+                        <p class="text-xs text-gray-400">Lata 250ml</p>
+                        <span class="text-red-400 font-bold text-sm mt-1 block">R$ 12,00</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-black/40 p-1 rounded-xl border border-white/5">
+                        <button onclick="alterarQtd('Energético Red Bull', 12.00, -1)" class="w-8 h-8 rounded-lg bg-zinc-800 text-white font-bold flex items-center justify-center">-</button>
+                        <span id="qtd-Energético Red Bull" class="w-6 text-center font-bold text-sm">0</span>
+                        <button onclick="alterarQtd('Energético Red Bull', 12.00, 1)" class="w-8 h-8 rounded-lg bg-red-600 text-white font-bold flex items-center justify-center">+</button>
                     </div>
                 </div>
             </div>
@@ -135,7 +163,7 @@
             projectId: "SEU_PROJECT_ID",
             storageBucket: "SEU_STORAGE_BUCKET",
             messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-            appId: "SUA_APP_ID"
+            appId: "SEU_APP_ID"
         };
         
         if (!firebase.apps.length) {
