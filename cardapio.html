@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -415,7 +415,8 @@
                     await db.collection('comandas').doc(String(mesaAtual)).set({ 
                         contaSolicitada: true, 
                         solicitadoEm: Date.now(),
-                        novoPedidoAlerta: true 
+                        novoPedidoAlerta: true,
+                        origem: "cardapio_digital"
                     }, { merge: true });
                     
                     alert('Conta solicitada com sucesso! O garçom já foi avisado.');
@@ -527,7 +528,8 @@
                     total: totalExistente + valorAdicional,
                     criadoEm: doc.exists ? doc.data().criadoEm : Date.now(),
                     atualizadoEm: Date.now(),
-                    novoPedidoAlerta: true
+                    novoPedidoAlerta: true,
+                    origem: "cardapio_digital" // Identifica que este pedido veio do cliente via cardápio digital
                 }, { merge: true });
 
                 alert('Pedido enviado com sucesso!');
