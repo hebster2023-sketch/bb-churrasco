@@ -3,154 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#f8fafc" id="meta-theme-color">
+    <meta name="theme-color" content="#09090b" id="meta-theme-color">
     <title>B.B CHURRASCO – Cardápio Digital</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        .cats::-webkit-scrollbar { display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
         html { scroll-behavior: smooth; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen pb-40 transition-colors duration-300 font-sans">
+<body class="bg-neutral-950 text-neutral-100 antialiased selection:bg-red-600 selection:text-white pb-32">
 
     <!-- Modal de Seleção de Mesa (PIN Seguro) -->
-    <div id="modal-mesa" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-slate-200 dark:border-slate-800 text-center shadow-2xl">
-            <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-4 sm:hidden"></div>
-            <h1 class="text-2xl font-black text-red-600 tracking-tight mb-1">B.B CHURRASCO</h1>
-            <p id="modal-mesa-titulo" class="text-xs text-slate-500 dark:text-slate-400 mb-5 font-medium">Selecione o número da sua mesa:</p>
+    <div id="modal-mesa" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-neutral-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-neutral-800 text-center shadow-2xl">
+            <div class="w-12 h-1.5 bg-neutral-700 rounded-full mx-auto mb-4 sm:hidden"></div>
+            <h1 class="text-2xl font-black text-red-500 tracking-tight mb-1 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-fire text-amber-500 text-lg"></i> B.B CHURRASCO
+            </h1>
+            <p id="modal-mesa-titulo" class="text-xs text-neutral-400 mb-5 font-medium">Selecione o número da sua mesa:</p>
             
-            <div id="grid-mesas" class="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto mb-2 p-1">
+            <div id="grid-mesas" class="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto mb-2 p-1 no-scrollbar">
                 <!-- Preenchido via JS -->
             </div>
 
             <!-- Bloco de Senha para Mesa Ocupada por Outro -->
-            <div id="bloco-senha-mesa" class="hidden mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-left">
-                <p id="label-senha-instrucao" class="text-xs text-slate-600 dark:text-slate-300 mb-2 font-medium">Mesa Ocupada. Insira a senha:</p>
-                <input type="password" id="input-senha-mesa" maxlength="4" placeholder="••••" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 text-center text-xl tracking-[0.5em] text-slate-900 dark:text-white mb-3 focus:outline-none focus:border-red-600">
+            <div id="bloco-senha-mesa" class="hidden mt-4 pt-4 border-t border-neutral-800 text-left">
+                <p id="label-senha-instrucao" class="text-xs text-neutral-300 mb-2 font-medium">Mesa Ocupada. Insira a senha:</p>
+                <input type="password" id="input-senha-mesa" maxlength="4" placeholder="••••" class="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-3.5 text-center text-xl tracking-[0.5em] text-white mb-3 focus:outline-none focus:border-red-600">
                 <div class="flex gap-2">
-                    <button onclick="voltarGridMesas()" class="w-1/2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-2xl text-xs transition-colors">Voltar</button>
-                    <button onclick="confirmarSenhaMesa()" class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-2xl text-xs shadow-lg shadow-red-600/20 transition-transform active:scale-95">Entrar na Mesa</button>
+                    <button onclick="voltarGridMesas()" class="w-1/2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold py-3 rounded-2xl text-xs transition-colors">Voltar</button>
+                    <button onclick="confirmarSenhaMesa()" class="w-1/2 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-2xl text-xs shadow-lg shadow-red-600/20 transition-transform active:scale-95">Entrar na Mesa</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Modal: Histórico de Pedidos da Comanda -->
-    <div id="modal-comanda" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl">
-            <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-4 sm:hidden"></div>
+    <div id="modal-comanda" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="bg-neutral-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-neutral-800 shadow-2xl">
+            <div class="w-12 h-1.5 bg-neutral-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h2 class="text-base font-black text-slate-900 dark:text-white">Comanda Consumida</h2>
-                    <p id="sub-comanda-mesa" class="text-xs text-red-600 font-bold">Mesa --</p>
+                    <h2 class="text-base font-black text-white">Comanda Consumida</h2>
+                    <p id="sub-comanda-mesa" class="text-xs text-red-500 font-bold">Mesa --</p>
                 </div>
-                <button onclick="fecharComandaModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold">&times;</button>
+                <button onclick="fecharComandaModal()" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 font-bold">&times;</button>
             </div>
-            <div id="lista-comanda-historico" class="space-y-2.5 max-h-60 overflow-y-auto mb-4 text-sm pr-1"></div>
-            <div class="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center font-black text-base mb-4">
-                <span class="text-slate-400 dark:text-slate-500 text-xs font-semibold">Total Acumulado:</span>
-                <span id="comanda-total-geral" class="text-red-600 text-lg">R$ 0,00</span>
+            <div id="lista-comanda-historico" class="space-y-2.5 max-h-60 overflow-y-auto mb-4 text-sm pr-1 no-scrollbar"></div>
+            <div class="border-t border-neutral-800 pt-3 flex justify-between items-center font-black text-base mb-4">
+                <span class="text-neutral-400 text-xs font-semibold">Total Acumulado:</span>
+                <span id="comanda-total-geral" class="text-red-500 text-lg">R$ 0,00</span>
             </div>
             <div class="flex gap-2">
-                <button onclick="pedirConta()" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition-transform active:scale-95 flex items-center justify-center gap-1.5">
+                <button onclick="pedirConta()" class="w-1/2 bg-amber-600 hover:bg-amber-500 text-white font-bold py-3.5 rounded-2xl text-xs shadow-lg shadow-amber-600/20 transition-transform active:scale-95 flex items-center justify-center gap-1.5">
                     <span>🧾 Pedir a Conta</span>
                 </button>
-                <button onclick="fecharComandaModal()" class="w-1/2 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold py-3.5 rounded-2xl text-xs">Voltar</button>
+                <button onclick="fecharComandaModal()" class="w-1/2 bg-neutral-800 text-neutral-200 font-bold py-3.5 rounded-2xl text-xs">Voltar</button>
             </div>
         </div>
     </div>
 
     <!-- Modal: Informações / Rodapé do Estabelecimento -->
-    <div id="modal-info" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl">
-            <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-4 sm:hidden"></div>
+    <div id="modal-info" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="bg-neutral-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-neutral-800 shadow-2xl">
+            <div class="w-12 h-1.5 bg-neutral-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-base font-black text-slate-900 dark:text-white">Informações da Casa</h2>
-                <button onclick="fecharInfoModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold">&times;</button>
+                <h2 class="text-base font-black text-white">Informações da Casa</h2>
+                <button onclick="fecharInfoModal()" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 font-bold">&times;</button>
             </div>
-            <div class="space-y-3.5 text-xs text-slate-600 dark:text-slate-300 mb-5">
-                <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+            <div class="space-y-3.5 text-xs text-neutral-300 mb-5">
+                <div class="bg-neutral-950 p-3.5 rounded-2xl border border-neutral-800 flex items-center justify-between">
                     <div>
-                        <p class="font-bold text-slate-900 dark:text-white text-xs">📶 Wi-Fi para Clientes</p>
-                        <p class="text-[11px] text-slate-500 mt-0.5">Rede: <span class="font-semibold text-red-600">bb.churrasco</span></p>
+                        <p class="font-bold text-white text-xs">📶 Wi-Fi para Clientes</p>
+                        <p class="text-[11px] text-neutral-400 mt-0.5">Rede: <span class="font-semibold text-red-500">bb.churrasco</span></p>
                     </div>
-                    <span class="font-mono bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-2.5 py-1 rounded-xl text-xs font-bold">deus2010</span>
+                    <span class="font-mono bg-neutral-800 text-neutral-200 px-2.5 py-1 rounded-xl text-xs font-bold">deus2010</span>
                 </div>
-                <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800">
-                    <p class="font-bold text-slate-900 dark:text-white text-xs mb-1">⏰ Horário de Funcionamento</p>
-                    <p class="text-[11px] text-slate-500">Terça a Sábado: 18h00 às 01h00</p>
+                <div class="bg-neutral-950 p-3.5 rounded-2xl border border-neutral-800">
+                    <p class="font-bold text-white text-xs mb-1">⏰ Horário de Funcionamento</p>
+                    <p class="text-[11px] text-neutral-400">Terça a Sábado: 18h00 às 01h00</p>
                 </div>
-                <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800">
-                    <p class="font-bold text-slate-900 dark:text-white text-xs mb-1">💳 Formas de Pagamento</p>
-                    <p class="text-[11px] text-slate-500">Pix, Cartões de Crédito/Débito e Dinheiro.</p>
+                <div class="bg-neutral-950 p-3.5 rounded-2xl border border-neutral-800">
+                    <p class="font-bold text-white text-xs mb-1">💳 Formas de Pagamento</p>
+                    <p class="text-[11px] text-neutral-400">Pix, Cartões de Crédito/Débito e Dinheiro.</p>
                 </div>
             </div>
-            <button onclick="fecharInfoModal()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold py-3.5 rounded-2xl text-sm">Entendido</button>
+            <button onclick="fecharInfoModal()" class="w-full bg-neutral-800 text-neutral-200 font-bold py-3.5 rounded-2xl text-sm">Entendido</button>
         </div>
     </div>
 
-    <!-- App Container Principal (Estilo Minimalista Clean) -->
-    <div id="app" class="max-w-md mx-auto p-4">
-        <!-- Header Minimalista com Fundo Branco/Escuro sutil e borda fina -->
-        <header class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 rounded-[2rem] shadow-sm mb-4 text-slate-900 dark:text-white relative overflow-hidden">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h1 class="text-xl font-black tracking-tight text-red-600">B.B CHURRASCO</h1>
-                    <p id="mesa-display" class="text-xs text-slate-400 dark:text-slate-400 mt-0.5 font-medium">Mesa -- • Cardápio Digital</p>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <button onclick="alternarTema()" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 w-9 h-9 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700"><span id="icone-tema">☀️</span></button>
-                    <button onclick="mudarMesa()" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs px-3 h-9 rounded-2xl font-bold border border-slate-200 dark:border-slate-700">Mesa</button>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="abrirComandaModal()" class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 text-[11px] font-bold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-1.5 transition-colors">📋 Ver Comanda</button>
-                <button onclick="abrirInfoModal()" class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 text-[11px] font-bold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-1.5 transition-colors">ℹ️ Wi-Fi / Info</button>
-            </div>
-        </header>
-
-        <div class="mb-4">
-            <input type="text" id="nome-cliente" placeholder="Seu Nome / Apelido (Opcional)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-red-600 text-xs font-medium shadow-sm">
+    <!-- HEADER / BANNER DE CAPA ESTILO REFERÊNCIA -->
+    <header class="relative w-full h-72 bg-neutral-900 overflow-hidden shadow-2xl">
+        <div class="absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=80" alt="Churrasco Background" class="w-full h-full object-cover opacity-50">
+            <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-transparent"></div>
         </div>
 
-        <div class="sticky top-2 z-35 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md pt-1 pb-3 -mx-4 px-4 mb-2">
-            <div id="categorias-container" class="flex gap-2 overflow-x-auto pb-1 cats scrollbar-none"></div>
+        <!-- Top Controls -->
+        <div class="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
+            <button onclick="mudarMesa()" class="px-3.5 h-10 rounded-full bg-neutral-900/80 backdrop-blur-md flex items-center gap-2 text-white border border-neutral-700/50 shadow-md text-xs font-bold">
+                <i class="fa-solid fa-chair text-red-500"></i> <span id="mesa-display">Mesa --</span>
+            </button>
+            <div class="flex gap-2">
+                <button onclick="abrirComandaModal()" class="w-10 h-10 rounded-full bg-neutral-900/80 backdrop-blur-md flex items-center justify-center text-white border border-neutral-700/50 shadow-md" title="Ver Comanda">
+                    <i class="fa-solid fa-receipt text-xs"></i>
+                </button>
+                <button onclick="abrirInfoModal()" class="w-10 h-10 rounded-full bg-neutral-900/80 backdrop-blur-md flex items-center justify-center text-white border border-neutral-700/50 shadow-md" title="Informações">
+                    <i class="fa-solid fa-circle-info text-xs"></i>
+                </button>
+            </div>
         </div>
 
-        <div id="produtos-container" class="space-y-3"></div>
+        <!-- Logo e Chamada Centralizada -->
+        <div class="absolute bottom-6 left-0 right-0 text-center px-4 z-10">
+            <div class="inline-block bg-neutral-950/80 backdrop-blur-md border border-red-500/30 px-6 py-2 rounded-2xl shadow-xl">
+                <h1 class="text-2xl font-black tracking-wider text-red-500 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-fire text-amber-500 text-lg"></i> B.B CHURRASCO
+                </h1>
+                <p class="text-[11px] text-neutral-300 tracking-widest uppercase font-medium mt-0.5">Sabor que une</p>
+            </div>
+            <div class="mt-2">
+                <input type="text" id="nome-cliente" placeholder="Seu Nome / Apelido (Opcional)" class="w-64 max-w-full bg-neutral-900/80 backdrop-blur-md border border-neutral-800 rounded-full py-1.5 px-4 text-center text-white placeholder-neutral-400 focus:outline-none focus:border-red-600 text-xs font-medium shadow-inner">
+            </div>
+        </div>
+    </header>
+
+    <!-- BARRA DE CATEGORIAS (SCROLL HORIZONTAL COM ÍCONES) -->
+    <nav class="sticky top-0 bg-neutral-950/95 backdrop-blur-md z-40 py-3 border-b border-neutral-800 shadow-lg">
+        <div id="categorias-container" class="flex gap-3 overflow-x-auto no-scrollbar px-4">
+            <!-- Renderizado dinamicamente via JS -->
+        </div>
+    </nav>
+
+    <!-- CONTEÚDO PRINCIPAL: LISTA DE PRODUTOS COM FOTOS -->
+    <main class="max-w-xl mx-auto px-4 mt-6">
+        <div id="produtos-container" class="space-y-3">
+            <!-- Renderizado dinamicamente via JS -->
+        </div>
+    </main>
+
+    <!-- BARRA INFERIOR DO CARRINHO (ESTILO APP NATIVO) -->
+    <div id="carrinho-bar" class="fixed bottom-0 left-0 right-0 bg-neutral-900/95 backdrop-blur-lg border-t border-neutral-800 p-4 max-w-xl mx-auto hidden z-40 shadow-2xl rounded-t-3xl">
+        <div class="flex justify-between items-center mb-2.5 px-2">
+            <span class="text-xs text-neutral-400 font-medium"><span id="total-itens" class="font-bold text-white">0</span> itens selecionados</span>
+            <span id="total-valor" class="text-base font-black text-red-500">R$ 0,00</span>
+        </div>
+        <button onclick="abrirResumo()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-red-600/25 text-xs transition-transform active:scale-95">Ver Pedido e Enviar para a Cozinha</button>
     </div>
 
-    <!-- Barra Inferior do Carrinho -->
-    <div id="carrinho-bar" class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-950/95 border-t border-slate-200 dark:border-slate-800 p-4 backdrop-blur-xl max-w-md mx-auto hidden z-40 rounded-t-[2rem] shadow-xl">
-        <div class="flex justify-between items-center mb-3">
-            <span class="text-xs text-slate-500 font-medium"><span id="total-itens" class="font-bold text-slate-800 dark:text-slate-200">0</span> itens selecionados</span>
-            <span id="total-valor" class="text-base font-black text-red-600">R$ 0,00</span>
-        </div>
-        <button onclick="abrirResumo()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-red-600/25 text-xs transition-transform active:scale-95">Ver Pedido e Enviar</button>
-    </div>
-
-    <!-- Modal Resumo -->
-    <div id="modal-resumo" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl">
+    <!-- Modal Resumo do Pedido -->
+    <div id="modal-resumo" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="bg-neutral-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-neutral-800 shadow-2xl">
             <div class="flex justify-between items-center mb-3">
-                <h2 id="modal-titulo" class="text-base font-black text-slate-900 dark:text-white">Confirme seu Pedido</h2>
-                <button onclick="fecharResumo()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold">&times;</button>
+                <h2 id="modal-titulo" class="text-base font-black text-white">Confirme seu Pedido</h2>
+                <button onclick="fecharResumo()" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 font-bold">&times;</button>
             </div>
-            <div id="lista-carrinho" class="space-y-2 max-h-52 overflow-y-auto mb-3 text-sm pr-1"></div>
-            <div class="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between font-bold text-base mb-4 text-slate-900 dark:text-white">
-                <span class="text-xs text-slate-400">Total:</span>
-                <span id="modal-total" class="text-red-600">R$ 0,00</span>
+            <div id="lista-carrinho" class="space-y-2 max-h-52 overflow-y-auto mb-3 text-sm pr-1 no-scrollbar"></div>
+            <div class="border-t border-neutral-800 pt-3 flex justify-between font-bold text-base mb-4 text-white">
+                <span class="text-xs text-neutral-400">Total:</span>
+                <span id="modal-total" class="text-red-500">R$ 0,00</span>
             </div>
-            <button onclick="enviarPedidoFirebase()" class="w-full bg-red-600 text-white font-bold py-3.5 rounded-2xl mb-2 text-xs shadow-lg shadow-red-600/20">🚀 Enviar para a Cozinha</button>
-            <button onclick="fecharResumo()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-2xl text-xs">Continuar escolhendo</button>
+            <button onclick="enviarPedidoFirebase()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-2xl mb-2 text-xs shadow-lg shadow-red-600/20">🚀 Enviar para a Cozinha</button>
+            <button onclick="fecharResumo()" class="w-full bg-neutral-800 text-neutral-300 font-bold py-3 rounded-2xl text-xs">Continuar escolhendo</button>
         </div>
     </div>
 
@@ -167,77 +197,78 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Cardápio completo com imagens ilustrativas profissionais via Unsplash para cada item
         const cardapio = {
             "CHURRASCOS": [
-                ["Frango", 8, "Suculento espeto de frango"],
-                ["Porco", 8, "Espeto suíno temperado"],
-                ["Linguiça", 8, "Linguiça artesanal na brasa"],
-                ["Coração de frango", 8, "Corações selecionados"],
-                ["Coração de boi", 8, "Coração bovino grelhado"],
-                ["Carne", 8, "Espeto de carne bovina"],
-                ["Tripa", 8, "Tripa crocante na brasa"]
+                ["Frango", 8, "Suculento espeto de frango na brasa", "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80"],
+                ["Porco", 8, "Espeto suíno temperado com ervas", "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80"],
+                ["Linguiça", 8, "Linguiça artesanal grelhada no ponto", "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=300&q=80"],
+                ["Coração de frango", 8, "Corações selecionados e marinados", "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80"],
+                ["Coração de boi", 8, "Coração bovino grelhado na brasa forte", "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80"],
+                ["Carne", 8, "Espeto de carne bovina macia", "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=300&q=80"],
+                ["Tripa", 8, "Tripa super crocante na brasa", "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80"]
             ],
             "CARANGUEJO": [
-                ["Caranguejo Unidade", 8, "Unidade fresca ao leite de coco"],
-                ["Combo 4 Caranguejos", 28, "Combo promocional com 4 unidades"],
-                ["Caldo de Caranguejo", 5, "Caldo quentinho e temperado"]
+                ["Caranguejo Unidade", 8, "Unidade fresca ao leite de coco", "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80"],
+                ["Combo 4 Caranguejos", 28, "Combo promocional com 4 unidades", "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80"],
+                ["Caldo de Caranguejo", 5, "Caldo quentinho e temperado", "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80"]
             ],
             "BEBIDAS": [
-                ["Skol", 5, "Lata 350ml"],
-                ["Brahma Chopp", 5, "Lata 350ml"],
-                ["Brahma Puro Malte", 5, "Lata 350ml"],
-                ["Império", 9, "Lata 350ml"],
-                ["Heineken", 9, "Long Neck 330ml"],
-                ["Corona Extra", 10, "Long Neck 330ml"],
-                ["Budweiser", 8, "Long Neck 330ml"],
-                ["Vinho", 8, "Taça / Dose"],
-                ["Caipirinha", 15, "Cachaça, limão e açúcar (Copo)"],
-                ["Energético Red bull", 12, "Lata 250ml"],
-                ["Kit gin", 80, "Gin rock’s / energético Baly / Gelo (Garrafa/Kit)"],
-                ["Stella gold", 11, "Long Neck 330ml"],
-                ["Ice cabaré", 9, "Long Neck 275ml"],
-                ["Balde Skol", 50, "Balde com várias unidades"],
-                ["Balde Brahma", 50, "Balde com várias unidades"],
-                ["Terça amarela", 7, "Lata 350ml"],
-                ["Terça prata", 6, "Lata 350ml"],
-                ["Meio litro amarela", 16, "Garrafa 600ml"],
-                ["Meio litro prata", 15, "Garrafa 600ml"],
-                ["Litro da amarela", 35, "Garrafa 1 Litro"],
-                ["Litro da prata", 30, "Garrafa 1 Litro"]
+                ["Skol", 5, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Brahma Chopp", 5, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Brahma Puro Malte", 5, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Império", 9, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Heineken", 9, "Long Neck 330ml", "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80"],
+                ["Corona Extra", 10, "Long Neck 330ml", "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80"],
+                ["Budweiser", 8, "Long Neck 330ml", "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80"],
+                ["Vinho", 8, "Taça / Dose", "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=300&q=80"],
+                ["Caipirinha", 15, "Cachaça, limão e açúcar", "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=300&q=80"],
+                ["Energético Red bull", 12, "Lata 250ml", "https://images.unsplash.com/photo-1622543925917-763c34d1a86e?auto=format&fit=crop&w=300&q=80"],
+                ["Kit gin", 80, "Gin rock’s / energético / Gelo", "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=300&q=80"],
+                ["Stella gold", 11, "Long Neck 330ml", "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80"],
+                ["Ice cabaré", 9, "Long Neck 275ml", "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80"],
+                ["Balde Skol", 50, "Balde com várias unidades", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Balde Brahma", 50, "Balde com várias unidades", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Terça amarela", 7, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Terça prata", 6, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Meio litro amarela", 16, "Garrafa 600ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Meio litro prata", 15, "Garrafa 600ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Litro da amarela", 35, "Garrafa 1 Litro", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
+                ["Litro da prata", 30, "Garrafa 1 Litro", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"]
             ],
             "GUARNIÇÕES": [
-                ["Baião caseiro grande", 8, "Porção grande tradicional"],
-                ["Baião caseiro pequeno", 4, "Porção individual"],
-                ["Baião cremoso grande", 10, "Com requeijão cremoso"],
-                ["Baião cremoso pequeno", 5, "Individual cremoso"],
-                ["Feijão verde", 25, "Combo especial"],
-                ["Panelada", 18, "Acompanha arroz / farofa de cuscuz"]
+                ["Baião caseiro grande", 8, "Porção grande tradicional", "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80"],
+                ["Baião caseiro pequeno", 4, "Porção individual", "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80"],
+                ["Baião cremoso grande", 10, "Com requeijão cremoso", "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80"],
+                ["Baião cremoso pequeno", 5, "Individual cremoso", "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80"],
+                ["Feijão verde", 25, "Combo especial temperado", "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80"],
+                ["Panelada", 18, "Acompanha arroz / farofa", "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80"]
             ],
             "PETISCOS": [
-                ["Batata frita", 15, "Porção crocante"],
-                ["Calabresa acebolada", 15, "Com cebolas douradas"],
-                ["Camarão (porção)", 25, "Camarões selecionados"],
-                ["Bolinha carne do sol", 18, "Porção recheada"],
-                ["Bolinha de queijo", 15, "Crocante e derretida"]
+                ["Batata frita", 15, "Porção crocante", "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=300&q=80"],
+                ["Calabresa acebolada", 15, "Com cebolas douradas", "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=300&q=80"],
+                ["Camarão (porção)", 25, "Camarões selecionados", "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80"],
+                ["Bolinha carne do sol", 18, "Porção recheada", "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=300&q=80"],
+                ["Bolinha de queijo", 15, "Crocante e derretida", "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=300&q=80"]
             ],
             "REFRIGERANTES": [
-                ["Coca-Cola 1L", 8, "Garrafa 1 Litro"],
-                ["Guaraná 1L", 7, "Garrafa 1 Litro"],
-                ["Pepsi 1L", 7, "Garrafa 1 Litro"],
-                ["Coca-Cola lata", 5, "Lata 350ml"],
-                ["Fanta lata", 5, "Lata 350ml"],
-                ["Sprite lata", 6, "Lata 350ml"],
-                ["Água", 3, "Garrafa 500ml sem gás"],
-                ["Água com gás", 4, "Garrafa 500ml com gás"]
+                ["Coca-Cola 1L", 8, "Garrafa 1 Litro", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
+                ["Guaraná 1L", 7, "Garrafa 1 Litro", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
+                ["Pepsi 1L", 7, "Garrafa 1 Litro", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
+                ["Coca-Cola lata", 5, "Lata 350ml", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
+                ["Fanta lata", 5, "Lata 350ml", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
+                ["Sprite lata", 6, "Lata 350ml", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
+                ["Água", 3, "Garrafa 500ml sem gás", "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=300&q=80"],
+                ["Água com gás", 4, "Garrafa 500ml com gás", "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=300&q=80"]
             ],
             "SUCOS": [
-                ["Suco Maracujá 400ml", 8, "Fruta natural da polpa"],
-                ["Suco Manga 400ml", 7, "Refrescante e cremoso"],
-                ["Suco Goiaba 400ml", 7, "Sabor natural"]
+                ["Suco Maracujá 400ml", 8, "Fruta natural da polpa", "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=300&q=80"],
+                ["Suco Manga 400ml", 7, "Refrescante e cremoso", "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=300&q=80"],
+                ["Suco Goiaba 400ml", 7, "Sabor natural", "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=300&q=80"]
             ],
             "DIVERSOS": [
-                ["Cigarro", 7, "Carteira"],
-                ["Partilha halls", 3, "Unidade de pastilha"]
+                ["Cigarro", 7, "Carteira", "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=300&q=80"],
+                ["Partilha halls", 3, "Unidade de pastilha", "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=300&q=80"]
             ]
         };
 
@@ -246,46 +277,11 @@
         let categoriaAtiva = "CHURRASCOS";
         let carrinho = [];
 
-        function inicializarTema() {
-            const temaSalvo = localStorage.getItem('bb_tema');
-            const html = document.documentElement;
-            const metaTheme = document.getElementById('meta-theme-color');
-            const iconeTema = document.getElementById('icone-tema');
-
-            if (temaSalvo === 'dark') {
-                html.classList.add('dark');
-                if(metaTheme) metaTheme.content = "#020617";
-                if(iconeTema) iconeTema.innerText = "🌙";
-            } else {
-                html.classList.remove('dark');
-                if(metaTheme) metaTheme.content = "#f8fafc";
-                if(iconeTema) iconeTema.innerText = "☀️";
-            }
-        }
-
-        function alternarTema() {
-            const html = document.documentElement;
-            const metaTheme = document.getElementById('meta-theme-color');
-            const iconeTema = document.getElementById('icone-tema');
-
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                localStorage.setItem('bb_tema', 'light');
-                if(metaTheme) metaTheme.content = "#f8fafc";
-                if(iconeTema) iconeTema.innerText = "☀️";
-            } else {
-                html.classList.add('dark');
-                localStorage.setItem('bb_tema', 'dark');
-                if(metaTheme) metaTheme.content = "#020617";
-                if(iconeTema) iconeTema.innerText = "🌙";
-            }
-        }
-
         async function iniciarGridMesas() {
             const grid = document.getElementById('grid-mesas');
             document.getElementById('bloco-senha-mesa').classList.add('hidden');
             grid.classList.remove('hidden');
-            grid.innerHTML = `<p class="col-span-5 text-center text-xs text-slate-400 py-6">Carregando mesas...</p>`;
+            grid.innerHTML = `<p class="col-span-5 text-center text-xs text-neutral-400 py-6">Carregando mesas...</p>`;
 
             try {
                 const snapshot = await db.collection('comandas').get();
@@ -299,15 +295,15 @@
                 for (let i = 1; i <= 30; i++) {
                     const ocupada = mesasOcupadas[String(i)] || false;
                     if (ocupada) {
-                        grid.innerHTML += `<button onclick="clicarMesa(${i}, true)" class="bg-red-500/10 border border-red-500/20 rounded-2xl p-2.5 flex flex-col items-center justify-center active:scale-95"><span class="font-black text-sm text-red-600">${i}</span><span class="text-[9px] font-bold text-red-500">OCUPADA</span></button>`;
+                        grid.innerHTML += `<button onclick="clicarMesa(${i}, true)" class="bg-red-500/10 border border-red-500/20 rounded-2xl p-2.5 flex flex-col items-center justify-center active:scale-95"><span class="font-black text-sm text-red-500">${i}</span><span class="text-[9px] font-bold text-red-400">OCUPADA</span></button>`;
                     } else {
-                        grid.innerHTML += `<button onclick="clicarMesa(${i}, false)" class="bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold py-3.5 rounded-2xl text-sm border border-slate-200 dark:border-slate-700 active:scale-95"><span class="text-sm">${i}</span></button>`;
+                        grid.innerHTML += `<button onclick="clicarMesa(${i}, false)" class="bg-neutral-800 text-neutral-200 font-bold py-3.5 rounded-2xl text-sm border border-neutral-700 active:scale-95"><span class="text-sm">${i}</span></button>`;
                     }
                 }
             } catch (err) {
                 grid.innerHTML = '';
                 for (let i = 1; i <= 30; i++) {
-                    grid.innerHTML += `<button onclick="clicarMesa(${i}, false)" class="bg-slate-50 dark:bg-slate-800 text-white font-bold py-3.5 rounded-2xl text-sm">${i}</button>`;
+                    grid.innerHTML += `<button onclick="clicarMesa(${i}, false)" class="bg-neutral-800 text-white font-bold py-3.5 rounded-2xl text-sm border border-neutral-700">${i}</button>`;
                 }
             }
         }
@@ -370,7 +366,7 @@
         function selecionarMesaFinal(num) {
             mesaAtual = num;
             localStorage.setItem('bb_mesa_atual', mesaAtual);
-            document.getElementById('mesa-display').innerText = `Mesa ${mesaAtual} • Cardápio Digital`;
+            document.getElementById('mesa-display').innerText = `Mesa ${mesaAtual}`;
             document.getElementById('modal-mesa').classList.add('hidden');
         }
 
@@ -383,13 +379,13 @@
             if (!mesaAtual) return;
             document.getElementById('sub-comanda-mesa').innerText = `Mesa ${mesaAtual}`;
             const listaEl = document.getElementById('lista-comanda-historico');
-            listaEl.innerHTML = `<p class="text-xs text-center text-slate-400 py-4">Carregando...</p>`;
+            listaEl.innerHTML = `<p class="text-xs text-center text-neutral-400 py-4">Carregando...</p>`;
             document.getElementById('modal-comanda').classList.remove('hidden');
 
             try {
                 const doc = await db.collection('comandas').doc(String(mesaAtual)).get();
                 if (!doc.exists || !doc.data().itens || doc.data().itens.length === 0) {
-                    listaEl.innerHTML = `<p class="text-xs text-center text-slate-400 py-4">Nenhum item na comanda.</p>`;
+                    listaEl.innerHTML = `<p class="text-xs text-center text-neutral-400 py-4">Nenhum item na comanda.</p>`;
                     document.getElementById('comanda-total-geral').innerText = `R$ 0,00`;
                     return;
                 }
@@ -398,7 +394,7 @@
                 listaEl.innerHTML = itens.map(i => {
                     const sub = (i.preco || 0) * (i.qtd || 0);
                     total += sub;
-                    return `<div class="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-800 text-xs"><div><span class="font-bold text-slate-800 dark:text-slate-200">${i.qtd}x ${i.nome}</span></div><span class="font-black">R$ ${sub.toFixed(2).replace('.', ',')}</span></div>`;
+                    return `<div class="flex justify-between items-center py-2.5 border-b border-neutral-800 text-xs"><div><span class="font-bold text-neutral-200">${i.qtd}x ${i.nome}</span></div><span class="font-black text-white">R$ ${sub.toFixed(2).replace('.', ',')}</span></div>`;
                 }).join('');
                 document.getElementById('comanda-total-geral').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
             } catch(e) {}
@@ -428,29 +424,58 @@
 
         function renderizarCategorias() {
             const container = document.getElementById('categorias-container');
-            container.innerHTML = Object.keys(cardapio).map(cat => `
-                <button onclick="mudarCategoria('${cat}')" class="whitespace-nowrap px-4 py-2.5 rounded-2xl font-bold text-xs border transition-all ${cat === categoriaAtiva ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'}">${cat}</button>
-            `).join('');
+            const icones = {
+                "CHURRASCOS": "fa-fire",
+                "CARANGUEJO": "fa-utensils",
+                "BEBIDAS": "fa-martini-glass-citrus",
+                "GUARNIÇÕES": "fa-bowl-food",
+                "PETISCOS": "fa-cookie-bite",
+                "REFRIGERANTES": "fa-glass-water",
+                "SUCOS": "fa-cup-straw",
+                "DIVERSOS": "fa-basket-shopping"
+            };
+
+            container.innerHTML = Object.keys(cardapio).map(cat => {
+                const ativa = cat === categoriaAtiva;
+                const icone = icones[cat] || "fa-utensils";
+                return `
+                    <button onclick="mudarCategoria('${cat}')" class="flex flex-col items-center justify-center min-w-[72px] h-20 ${ativa ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' : 'bg-neutral-900 text-neutral-400 border border-neutral-800'} rounded-2xl transition-all flex-shrink-0">
+                        <div class="w-9 h-9 rounded-full ${ativa ? 'bg-white/20' : 'bg-neutral-800'} flex items-center justify-center mb-1 text-sm">
+                            <i class="fa-solid ${icone}"></i>
+                        </div>
+                        <span class="text-[11px] ${ativa ? 'font-bold' : 'font-medium'}">${cat}</span>
+                    </button>
+                `;
+            }).join('');
         }
 
-        function mudarCategoria(cat) { categoriaAtiva = cat; renderizarCategorias(); renderizarProdutos(); }
+        function mudarCategoria(cat) { 
+            categoriaAtiva = cat; 
+            renderizarCategorias(); 
+            renderizarProdutos(); 
+        }
 
         function renderizarProdutos() {
             const container = document.getElementById('produtos-container');
-            container.innerHTML = (cardapio[categoriaAtiva] || []).map(([nome, preco, desc]) => {
+            const itensCat = cardapio[categoriaAtiva] || [];
+
+            container.innerHTML = itensCat.map(([nome, preco, desc, foto]) => {
                 const item = carrinho.find(i => i.nome === nome);
                 const qtd = item ? item.qtd : 0;
                 return `
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 rounded-3xl flex justify-between items-center shadow-sm">
-                        <div class="pr-3">
-                            <h3 class="font-bold text-slate-900 dark:text-white text-sm">${nome}</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${desc}</p>
-                            <span class="text-red-600 font-black text-sm mt-2 block">R$ ${preco.toFixed(2).replace('.', ',')}</span>
-                        </div>
-                        <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, -1)" class="w-8 h-8 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold shadow-sm">-</button>
-                            <span id="qtd-${nome}" class="w-6 text-center font-bold text-sm">${qtd}</span>
-                            <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, 1)" class="w-8 h-8 rounded-xl bg-red-600 text-white font-bold shadow-sm">+</button>
+                    <div class="bg-neutral-900/90 border border-neutral-800/80 rounded-2xl p-3.5 flex items-center gap-4 shadow-md transition-all hover:border-neutral-700">
+                        <img src="${foto}" alt="${nome}" class="w-20 h-20 object-cover rounded-xl flex-shrink-0 shadow">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-sm text-white truncate">${nome}</h3>
+                            <p class="text-xs text-neutral-400 line-clamp-2 mt-0.5 leading-relaxed">${desc}</p>
+                            <div class="mt-2 flex items-center justify-between">
+                                <span class="text-sm font-extrabold text-red-500">R$ ${preco.toFixed(2).replace('.', ',')}</span>
+                                <div class="flex items-center gap-2 bg-neutral-950 p-1 rounded-xl border border-neutral-800">
+                                    <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, -1)" class="w-7 h-7 rounded-lg bg-neutral-800 text-neutral-200 font-bold text-xs flex items-center justify-center">-</button>
+                                    <span id="qtd-${nome}" class="w-5 text-center font-bold text-xs">${qtd}</span>
+                                    <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, 1)" class="w-7 h-7 rounded-lg bg-red-600 text-white font-bold text-xs flex items-center justify-center">+</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -489,7 +514,7 @@
             carrinho.forEach(item => {
                 const sub = item.preco * item.qtd;
                 total += sub;
-                lista.innerHTML += `<div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800 text-xs"><span>${item.qtd}x ${item.nome}</span><span class="font-bold">R$ ${sub.toFixed(2).replace('.', ',')}</span></div>`;
+                lista.innerHTML += `<div class="flex justify-between items-center py-2 border-b border-neutral-800 text-xs"><span>${item.qtd}x ${item.nome}</span><span class="font-bold text-white">R$ ${sub.toFixed(2).replace('.', ',')}</span></div>`;
             });
             document.getElementById('modal-total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
             document.getElementById('modal-resumo').classList.remove('hidden');
@@ -541,7 +566,6 @@
             }
         }
 
-        inicializarTema();
         verificarMesaInicial();
         renderizarCategorias();
         renderizarProdutos();
