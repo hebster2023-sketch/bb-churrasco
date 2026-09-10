@@ -195,7 +195,6 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Cardápio Padrão (Caso o banco ainda não tenha dados salvos)
         let cardapio = {
             "CHURRASCOS": [
                 { id: "ch_1", nome: "Frango", preco: 8, desc: "Suculento espeto de frango na brasa", foto: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80" },
@@ -212,8 +211,8 @@
                 { id: "ca_3", nome: "Caldo de Caranguejo", preco: 5, desc: "Caldo quentinho e temperado", foto: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80" }
             ],
             "BEBIDAS": [
-                { id: "be_1", nome: "Skol", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
-                { id: "be_2", nome: "Brahma Chopp", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_1", nome: "Skol", preco: 5, desc: "Litrinho 300ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_2", nome: "Brahma Chopp", preco: 5, desc: "Litrinho 300ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
                 { id: "be_3", nome: "Brahma Puro Malte", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
                 { id: "be_4", nome: "Império", preco: 9, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
                 { id: "be_5", nome: "Heineken", preco: 9, desc: "Long Neck 330ml", foto: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80" },
@@ -247,7 +246,6 @@
         let categoriaAtiva = "CHURRASCOS";
         let carrinho = [];
 
-        // Carregar cardápio salvo no Firebase ao iniciar
         async function carregarCardapioDoFirebase() {
             try {
                 const doc = await db.collection('configuracoes').doc('cardapio_global').get();
@@ -427,7 +425,6 @@
                 `;
             }).join('');
 
-            // Botão fixo do Painel Admin no final
             const adminAtivo = categoriaAtiva === "ADMIN";
             html += `
                 <button onclick="tentarAbrirAdmin()" class="flex flex-col items-center justify-center min-w-[72px] h-20 ${adminAtivo ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/30' : 'bg-neutral-900 text-amber-500 border border-neutral-800'} rounded-2xl transition-all flex-shrink-0">
@@ -478,7 +475,7 @@
                 adminContainer.classList.remove('hidden');
                 document.getElementById('carrinho-bar').classList.add('hidden');
 
-                let adminHtml = `<div class="bg-neutral-900 p-4 rounded-2xl border border-amber-500/30 mb-4"><h2 class="text-sm font-black text-amber-500 mb-1">Painel de Gerenciamento</h2><p class="text-xs text-neutral-400">Altere preços, descrições ou links de fotos e clique em "Salvar Alterações".</p></div>`;
+                let adminHtml = `<div class="bg-neutral-900 p-4 rounded-2xl border border-amber-500/30 mb-4"><h2 class="text-sm font-black text-amber-500 mb-1">Painel de Gerenciamento</h2><p class="text-xs text-neutral-400">Altere preços, descrições ou selecione uma foto direto da galeria do seu celular e clique em "Salvar".</p></div>`;
 
                 for (let cat in cardapio) {
                     adminHtml += `<h3 class="text-xs font-black text-red-500 uppercase tracking-widest mt-6 mb-2 border-b border-neutral-800 pb-1">${cat}</h3>`;
@@ -489,19 +486,24 @@
                                     <span class="text-xs font-bold text-white">${prod.nome}</span>
                                     <span class="text-[10px] bg-neutral-800 px-2 py-0.5 rounded text-neutral-400">${cat}</span>
                                 </div>
+                                <div class="flex items-center gap-3">
+                                    <img id="img-preview-${cat}-${index}" src="${prod.foto}" class="w-14 h-14 object-cover rounded-xl border border-neutral-800 flex-shrink-0">
+                                    <div class="flex-1">
+                                        <label class="text-[10px] text-neutral-400 block mb-1">Alterar Foto do Celular</label>
+                                        <input type="file" accept="image/*" onchange="converterFotoCelular(event, '${cat}', ${index})" class="w-full text-[11px] text-neutral-400 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-neutral-800 file:text-white hover:file:bg-neutral-700">
+                                        <!-- Armazena o link/base64 atual -->
+                                        <input type="hidden" id="admin-foto-${cat}-${index}" value="${prod.foto}">
+                                    </div>
+                                </div>
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
                                         <label class="text-[10px] text-neutral-400 block mb-1">Preço (R$)</label>
                                         <input type="number" step="0.50" id="admin-preco-${cat}-${index}" value="${prod.preco}" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-red-600">
                                     </div>
                                     <div>
-                                        <label class="text-[10px] text-neutral-400 block mb-1">Link da Foto</label>
-                                        <input type="text" id="admin-foto-${cat}-${index}" value="${prod.foto}" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-red-600">
+                                        <label class="text-[10px] text-neutral-400 block mb-1">Descrição</label>
+                                        <input type="text" id="admin-desc-${cat}-${index}" value="${prod.desc}" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-red-600">
                                     </div>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] text-neutral-400 block mb-1">Descrição</label>
-                                    <input type="text" id="admin-desc-${cat}-${index}" value="${prod.desc}" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-red-600">
                                 </div>
                             </div>
                         `;
@@ -539,6 +541,22 @@
             }).join('');
         }
 
+        // Converte a foto escolhida do celular para formato leve e atualiza a pré-visualização na hora
+        function converterFotoCelular(event, cat, index) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const leitor = new FileReader();
+            leitor.onload = function(e) {
+                const resultadoBase64 = e.target.result;
+                // Guarda o valor no input oculto
+                document.getElementById(`admin-foto-${cat}-${index}`).value = resultadoBase64;
+                // Atualiza a imagem redonda/quadrada pequena de pré-visualização
+                document.getElementById(`img-preview-${cat}-${index}`).src = resultadoBase64;
+            };
+            leitor.readAsDataURL(arquivo);
+        }
+
         async function salvarAlteracoesAdmin() {
             for (let cat in cardapio) {
                 cardapio[cat].forEach((prod, index) => {
@@ -554,7 +572,7 @@
 
             try {
                 await db.collection('configuracoes').doc('cardapio_global').set({ dados: cardapio });
-                alert("Cardápio atualizado e salvo com sucesso em nuvem!");
+                alert("Cardápio e fotos atualizados com sucesso!");
                 categoriaAtiva = "CHURRASCOS";
                 renderizarCategorias();
                 renderizarProdutos();
