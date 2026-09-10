@@ -195,15 +195,16 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Cardápio estruturado com base na sua lista enviada (com IDs e fotos padrão)
         let cardapio = {
             "CHURRASCOS": [
-                { id: "ch_1", nome: "Frango", preco: 8, desc: "Suculento espeto de frango na brasa", foto: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80" },
-                { id: "ch_2", nome: "Porco", preco: 8, desc: "Espeto suíno temperado com ervas", foto: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80" },
-                { id: "ch_3", nome: "Linguiça", preco: 8, desc: "Linguiça artesanal grelhada no ponto", foto: "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=300&q=80" },
-                { id: "ch_4", nome: "Coração de frango", preco: 8, desc: "Corações selecionados e marinados", foto: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80" },
-                { id: "ch_5", nome: "Coração de boi", preco: 8, desc: "Coração bovino grelhado na brasa forte", foto: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80" },
-                { id: "ch_6", nome: "Carne", preco: 8, desc: "Espeto de carne bovina macia", foto: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=300&q=80" },
-                { id: "ch_7", nome: "Tripa", preco: 8, desc: "Tripa super crocante na brasa", foto: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80" }
+                { id: "ch_1", nome: "Frango", preco: 8, desc: "Suculento espeto de frango", foto: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_2", nome: "Porco", preco: 8, desc: "Espeto suíno temperado", foto: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_3", nome: "Linguiça", preco: 8, desc: "Linguiça artesanal na brasa", foto: "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_4", nome: "Coração de frango", preco: 8, desc: "Corações selecionados", foto: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_5", nome: "Coração de boi", preco: 8, desc: "Coração bovino grelhado", foto: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_6", nome: "Carne", preco: 8, desc: "Espeto de carne bovina", foto: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_7", nome: "Tripa", preco: 8, desc: "Tripa crocante na brasa", foto: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80" }
             ],
             "CARANGUEJO": [
                 { id: "ca_1", nome: "Caranguejo Unidade", preco: 8, desc: "Unidade fresca ao leite de coco", foto: "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80" },
@@ -211,33 +212,61 @@
                 { id: "ca_3", nome: "Caldo de Caranguejo", preco: 5, desc: "Caldo quentinho e temperado", foto: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80" }
             ],
             "BEBIDAS": [
-                { id: "be_1", nome: "Skol", preco: 5, desc: "Litrinho 300ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
-                { id: "be_2", nome: "Brahma Chopp", preco: 5, desc: "Litrinho 300ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_1", nome: "Skol", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_2", nome: "Brahma Chopp", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
                 { id: "be_3", nome: "Brahma Puro Malte", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
                 { id: "be_4", nome: "Império", preco: 9, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
                 { id: "be_5", nome: "Heineken", preco: 9, desc: "Long Neck 330ml", foto: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80" },
                 { id: "be_6", nome: "Corona Extra", preco: 10, desc: "Long Neck 330ml", foto: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80" },
                 { id: "be_7", nome: "Budweiser", preco: 8, desc: "Long Neck 330ml", foto: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80" },
                 { id: "be_8", nome: "Vinho", preco: 8, desc: "Taça / Dose", foto: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=300&q=80" },
-                { id: "be_9", nome: "Caipirinha", preco: 15, desc: "Cachaça, limão e açúcar", foto: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_9", nome: "Caipirinha", preco: 15, desc: "Cachaça, limão e açúcar (Copo)", foto: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=300&q=80" },
                 { id: "be_10", nome: "Energético Red bull", preco: 12, desc: "Lata 250ml", foto: "https://images.unsplash.com/photo-1622543925917-763c34d1a86e?auto=format&fit=crop&w=300&q=80" },
-                { id: "be_11", nome: "Kit gin", preco: 80, desc: "Gin rock’s / energético / Gelo", foto: "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=300&q=80" }
+                { id: "be_11", nome: "Kit gin", preco: 80, desc: "Gin rock’s / energético Baly / Gelo (Garrafa/Kit)", foto: "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_12", nome: "Stella gold", preco: 11, desc: "Long Neck 330ml", foto: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_13", nome: "Ice cabaré", preco: 9, desc: "Long Neck 275ml", foto: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_14", nome: "Balde Skol", preco: 50, desc: "Balde com várias unidades", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_15", nome: "Balde Brahma", preco: 50, desc: "Balde com várias unidades", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_16", nome: "Terça amarela", preco: 7, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_17", nome: "Terça prata", preco: 6, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_18", nome: "Meio litro amarela", preco: 16, desc: "Garrafa 600ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_19", nome: "Meio litro prata", preco: 15, desc: "Garrafa 600ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_20", nome: "Litro da amarela", preco: 35, desc: "Garrafa 1 Litro", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_21", nome: "Litro da prata", preco: 30, desc: "Garrafa 1 Litro", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" }
             ],
             "GUARNIÇÕES": [
                 { id: "gu_1", nome: "Baião caseiro grande", preco: 8, desc: "Porção grande tradicional", foto: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80" },
                 { id: "gu_2", nome: "Baião caseiro pequeno", preco: 4, desc: "Porção individual", foto: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80" },
-                { id: "gu_3", nome: "Feijão verde", preco: 25, desc: "Combo especial temperado", foto: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80" },
-                { id: "gu_4", nome: "Panelada", preco: 18, desc: "Acompanha arroz / farofa", foto: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80" }
+                { id: "gu_3", nome: "Baião cremoso grande", preco: 10, desc: "Com requeijão cremoso", foto: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80" },
+                { id: "gu_4", nome: "Baião cremoso pequeno", preco: 5, desc: "Individual cremoso", foto: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80" },
+                { id: "gu_5", nome: "Feijão verde", preco: 25, desc: "Combo especial", foto: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80" },
+                { id: "gu_6", nome: "Panelada", preco: 18, desc: "Acompanha arroz / farofa de cuscuz", foto: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80" }
             ],
             "PETISCOS": [
                 { id: "pe_1", nome: "Batata frita", preco: 15, desc: "Porção crocante", foto: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=300&q=80" },
                 { id: "pe_2", nome: "Calabresa acebolada", preco: 15, desc: "Com cebolas douradas", foto: "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=300&q=80" },
-                { id: "pe_3", nome: "Camarão (porção)", preco: 25, desc: "Camarões selecionados", foto: "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80" }
+                { id: "pe_3", nome: "Camarão (porção)", preco: 25, desc: "Camarões selecionados", foto: "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80" },
+                { id: "pe_4", nome: "Bolinha carne do sol", preco: 18, desc: "Porção recheada", foto: "https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=300&q=80" },
+                { id: "pe_5", nome: "Bolinha de queijo", preco: 15, desc: "Crocante e derretida", foto: "https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=300&q=80" }
             ],
             "REFRIGERANTES": [
                 { id: "re_1", nome: "Coca-Cola 1L", preco: 8, desc: "Garrafa 1 Litro", foto: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" },
                 { id: "re_2", nome: "Guaraná 1L", preco: 7, desc: "Garrafa 1 Litro", foto: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" },
-                { id: "re_3", nome: "Água", preco: 3, desc: "Garrafa 500ml sem gás", foto: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=300&q=80" }
+                { id: "re_3", nome: "Pepsi 1L", preco: 7, desc: "Garrafa 1 Litro", foto: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" },
+                { id: "re_4", nome: "Coca-Cola lata", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" },
+                { id: "re_5", nome: "Fanta lata", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" },
+                { id: "re_6", nome: "Sprite lata", preco: 6, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" },
+                { id: "re_7", nome: "Água", preco: 3, desc: "Garrafa 500ml sem gás", foto: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=300&q=80" },
+                { id: "re_8", nome: "Água com gás", preco: 4, desc: "Garrafa 500ml com gás", foto: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=300&q=80" }
+            ],
+            "SUCOS": [
+                { id: "su_1", nome: "Suco Maracujá 400ml", preco: 8, desc: "Fruta natural da polpa", foto: "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=300&q=80" },
+                { id: "su_2", nome: "Suco Manga 400ml", preco: 7, desc: "Refrescante e cremoso", foto: "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=300&q=80" },
+                { id: "su_3", nome: "Suco Goiaba 400ml", preco: 7, desc: "Sabor natural", foto: "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=300&q=80" }
+            ],
+            "DIVERSOS": [
+                { id: "di_1", nome: "Cigarro", preco: 7, desc: "Carteira", foto: "https://images.unsplash.com/photo-1527842891465-429f0654e89e?auto=format&fit=crop&w=300&q=80" },
+                { id: "di_2", nome: "Partilha halls", preco: 3, desc: "Unidade de pastilha", foto: "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=300&q=80" }
             ]
         };
 
@@ -409,6 +438,8 @@
                 "GUARNIÇÕES": "fa-bowl-food",
                 "PETISCOS": "fa-cookie-bite",
                 "REFRIGERANTES": "fa-glass-water",
+                "SUCOS": "fa-blender",
+                "DIVERSOS": "fa-basket-shopping",
                 "ADMIN": "fa-gear"
             };
 
@@ -552,7 +583,6 @@
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
-                    // Reduz a resolução máxima para manter a foto super leve
                     let largura = img.width;
                     let altura = img.height;
                     const maxTamanho = 300; 
@@ -573,7 +603,6 @@
                     canvas.height = altura;
                     ctx.drawImage(img, 0, 0, largura, altura);
 
-                    // Converte comprimindo a qualidade para 70%
                     const imagemComprimida = canvas.toDataURL('image/jpeg', 0.7);
 
                     document.getElementById(`admin-foto-${cat}-${index}`).value = imagemComprimida;
