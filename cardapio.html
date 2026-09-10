@@ -195,7 +195,7 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Cardápio completo exato que você enviou (com fotos e IDs)
+        // Cardápio completo exato com fotos e IDs
         let cardapio = {
             "CHURRASCOS": [
                 { id: "ch_1", nome: "Frango", preco: 8, desc: "Suculento espeto de frango", foto: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80" },
@@ -277,11 +277,29 @@
 
         async function carregarCardapioDoFirebase() {
             try {
-                // FORÇAR ATUALIZAÇÃO DIRETA NO FIREBASE COM O SEU NOVO CARDÁPIO
-                await db.collection('configuracoes').doc('cardapio_global').set({ dados: cardapio });
-                console.log("Cardápio atualizado e sincronizado com sucesso!");
+                let cardapioCarregado = {};
+                let temDadosNaNuvem = false;
+
+                for (let cat in cardapio) {
+                    const doc = await db.collection('cardapio_categorias').doc(cat).get();
+                    if (doc.exists && doc.data().dados) {
+                        cardapioCarregado[cat] = doc.data().dados;
+                        temDadosNaNuvem = true;
+                    } else {
+                        cardapioCarregado[cat] = cardapio[cat];
+                    }
+                }
+
+                if (temDadosNaNuvem) {
+                    cardapio = cardapioCarregado;
+                } else {
+                    for (let cat in cardapio) {
+                        await db.collection('cardapio_categorias').doc(cat).set({ dados: cardapio[cat] });
+                    }
+                }
+                console.log("Cardápio sincronizado com sucesso por categorias!");
             } catch (e) {
-                console.error("Erro ao sincronizar cardápio, usando local.", e);
+                console.error("Erro ao sincronizar cardápio do Firebase, usando local.", e);
             }
             renderizarCategorias();
             renderizarProdutos();
@@ -626,14 +644,17 @@
             }
 
             try {
-                await db.collection('configuracoes').doc('cardapio_global').set({ dados: cardapio });
+                for (let cat in cardapio) {
+                    await db.collection('cardapio_categorias').doc(cat).set({ dados: cardapio[cat] });
+                }
+
                 alert("Cardápio e fotos atualizados com sucesso!");
                 categoriaAtiva = "CHURRASCOS";
                 renderizarCategorias();
                 renderizarProdutos();
             } catch (e) {
                 console.error(e);
-                alert("Erro ao salvar no banco de dados. Tente colocar uma foto menor.");
+                alert("Erro ao salvar no banco de dados. Tente alterar menos fotos por vez.");
             }
         }
 
