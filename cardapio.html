@@ -195,7 +195,7 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Cardápio estruturado com base na sua lista enviada (com IDs e fotos padrão)
+        // Cardápio completo exato que você enviou (com fotos e IDs)
         let cardapio = {
             "CHURRASCOS": [
                 { id: "ch_1", nome: "Frango", preco: 8, desc: "Suculento espeto de frango", foto: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80" },
@@ -277,12 +277,11 @@
 
         async function carregarCardapioDoFirebase() {
             try {
-                const doc = await db.collection('configuracoes').doc('cardapio_global').get();
-                if (doc.exists && doc.data().dados) {
-                    cardapio = doc.data().dados;
-                }
+                // FORÇAR ATUALIZAÇÃO DIRETA NO FIREBASE COM O SEU NOVO CARDÁPIO
+                await db.collection('configuracoes').doc('cardapio_global').set({ dados: cardapio });
+                console.log("Cardápio atualizado e sincronizado com sucesso!");
             } catch (e) {
-                console.error("Usando cardápio local padrão.");
+                console.error("Erro ao sincronizar cardápio, usando local.", e);
             }
             renderizarCategorias();
             renderizarProdutos();
@@ -571,7 +570,7 @@
             }).join('');
         }
 
-        // Reduz o tamanho e comprime a foto automaticamente para não travar o banco de dados
+        // Comprime fotos do admin automaticamente
         function comprimirEConverterFoto(event, cat, index) {
             const arquivo = event.target.files[0];
             if (!arquivo) return;
