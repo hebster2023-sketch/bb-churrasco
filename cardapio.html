@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#09090b" id="meta-theme-color">
-    <title>B.B CHURRASCO – Cardápio Digital</title>
+    <meta name="theme-color" content="#09090b">
+    <title>B.B CHURRASCO – Painel e Cardápio</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,23 +14,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         html { scroll-behavior: smooth; }
     </style>
 </head>
 <body class="bg-neutral-950 text-neutral-100 antialiased selection:bg-red-600 selection:text-white pb-32">
 
-    <!-- Modal de Seleção de Mesa (PIN Seguro) -->
-    <div id="modal-mesa" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <!-- Modal de Seleção de Mesa -->
+    <div id="modal-mesa" class="fixed inset-0 bg-neutral-950/85 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-neutral-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-neutral-800 text-center shadow-2xl">
             <div class="w-12 h-1.5 bg-neutral-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             <h1 class="text-2xl font-black text-red-500 tracking-tight mb-1 flex items-center justify-center gap-2">
@@ -38,24 +31,21 @@
             </h1>
             <p id="modal-mesa-titulo" class="text-xs text-neutral-400 mb-5 font-medium">Selecione o número da sua mesa:</p>
             
-            <div id="grid-mesas" class="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto mb-2 p-1 no-scrollbar">
-                <!-- Preenchido via JS -->
-            </div>
+            <div id="grid-mesas" class="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto mb-2 p-1 no-scrollbar"></div>
 
-            <!-- Bloco de Senha para Mesa Ocupada por Outro -->
             <div id="bloco-senha-mesa" class="hidden mt-4 pt-4 border-t border-neutral-800 text-left">
-                <p id="label-senha-instrucao" class="text-xs text-neutral-300 mb-2 font-medium">Mesa Ocupada. Insira a senha:</p>
+                <p class="text-xs text-neutral-300 mb-2 font-medium">Mesa Ocupada. Insira a senha:</p>
                 <input type="password" id="input-senha-mesa" maxlength="4" placeholder="••••" class="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-3.5 text-center text-xl tracking-[0.5em] text-white mb-3 focus:outline-none focus:border-red-600">
                 <div class="flex gap-2">
-                    <button onclick="voltarGridMesas()" class="w-1/2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold py-3 rounded-2xl text-xs transition-colors">Voltar</button>
-                    <button onclick="confirmarSenhaMesa()" class="w-1/2 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-2xl text-xs shadow-lg shadow-red-600/20 transition-transform active:scale-95">Entrar na Mesa</button>
+                    <button onclick="voltarGridMesas()" class="w-1/2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold py-3 rounded-2xl text-xs">Voltar</button>
+                    <button onclick="confirmarSenhaMesa()" class="w-1/2 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-2xl text-xs shadow-lg shadow-red-600/20">Entrar na Mesa</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Histórico de Pedidos da Comanda -->
-    <div id="modal-comanda" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <!-- Modal: Comanda -->
+    <div id="modal-comanda" class="fixed inset-0 bg-neutral-950/85 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-neutral-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-neutral-800 shadow-2xl">
             <div class="w-12 h-1.5 bg-neutral-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             <div class="flex justify-between items-center mb-4">
@@ -71,7 +61,7 @@
                 <span id="comanda-total-geral" class="text-red-500 text-lg">R$ 0,00</span>
             </div>
             <div class="flex gap-2">
-                <button onclick="pedirConta()" class="w-1/2 bg-amber-600 hover:bg-amber-500 text-white font-bold py-3.5 rounded-2xl text-xs shadow-lg shadow-amber-600/20 transition-transform active:scale-95 flex items-center justify-center gap-1.5">
+                <button onclick="pedirConta()" class="w-1/2 bg-amber-600 hover:bg-amber-500 text-white font-bold py-3.5 rounded-2xl text-xs shadow-lg shadow-amber-600/20 flex items-center justify-center gap-1.5">
                     <span>🧾 Pedir a Conta</span>
                 </button>
                 <button onclick="fecharComandaModal()" class="w-1/2 bg-neutral-800 text-neutral-200 font-bold py-3.5 rounded-2xl text-xs">Voltar</button>
@@ -79,8 +69,8 @@
         </div>
     </div>
 
-    <!-- Modal: Informações / Rodapé do Estabelecimento -->
-    <div id="modal-info" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <!-- Modal: Informações -->
+    <div id="modal-info" class="fixed inset-0 bg-neutral-950/85 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-neutral-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-neutral-800 shadow-2xl">
             <div class="w-12 h-1.5 bg-neutral-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             <div class="flex justify-between items-center mb-4">
@@ -108,29 +98,27 @@
         </div>
     </div>
 
-    <!-- HEADER / BANNER DE CAPA ESTILO REFERÊNCIA -->
+    <!-- HEADER / BANNER -->
     <header class="relative w-full h-72 bg-neutral-900 overflow-hidden shadow-2xl">
         <div class="absolute inset-0">
             <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=80" alt="Churrasco Background" class="w-full h-full object-cover opacity-50">
             <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-transparent"></div>
         </div>
 
-        <!-- Top Controls -->
         <div class="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
             <button onclick="mudarMesa()" class="px-3.5 h-10 rounded-full bg-neutral-900/80 backdrop-blur-md flex items-center gap-2 text-white border border-neutral-700/50 shadow-md text-xs font-bold">
                 <i class="fa-solid fa-chair text-red-500"></i> <span id="mesa-display">Mesa --</span>
             </button>
             <div class="flex gap-2">
-                <button onclick="abrirComandaModal()" class="w-10 h-10 rounded-full bg-neutral-900/80 backdrop-blur-md flex items-center justify-center text-white border border-neutral-700/50 shadow-md" title="Ver Comanda">
+                <button onclick="abrirComandaModal()" class="w-10 h-10 rounded-full bg-neutral-900/80 backdrop-blur-md flex items-center justify-center text-white border border-neutral-700/50 shadow-md">
                     <i class="fa-solid fa-receipt text-xs"></i>
                 </button>
-                <button onclick="abrirInfoModal()" class="w-10 h-10 rounded-full bg-neutral-900/80 backdrop-blur-md flex items-center justify-center text-white border border-neutral-700/50 shadow-md" title="Informações">
+                <button onclick="abrirInfoModal()" class="w-10 h-10 rounded-full bg-neutral-900/80 backdrop-blur-md flex items-center justify-center text-white border border-neutral-700/50 shadow-md">
                     <i class="fa-solid fa-circle-info text-xs"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Logo e Chamada Centralizada -->
         <div class="absolute bottom-6 left-0 right-0 text-center px-4 z-10">
             <div class="inline-block bg-neutral-950/80 backdrop-blur-md border border-red-500/30 px-6 py-2 rounded-2xl shadow-xl">
                 <h1 class="text-2xl font-black tracking-wider text-red-500 flex items-center justify-center gap-2">
@@ -144,21 +132,18 @@
         </div>
     </header>
 
-    <!-- BARRA DE CATEGORIAS (SCROLL HORIZONTAL COM ÍCONES) -->
+    <!-- MENU DE CATEGORIAS -->
     <nav class="sticky top-0 bg-neutral-950/95 backdrop-blur-md z-40 py-3 border-b border-neutral-800 shadow-lg">
-        <div id="categorias-container" class="flex gap-3 overflow-x-auto no-scrollbar px-4">
-            <!-- Renderizado dinamicamente via JS -->
-        </div>
+        <div id="categorias-container" class="flex gap-3 overflow-x-auto no-scrollbar px-4"></div>
     </nav>
 
-    <!-- CONTEÚDO PRINCIPAL: LISTA DE PRODUTOS COM FOTOS -->
+    <!-- LISTA DE PRODUTOS / PAINEL ADMIN -->
     <main class="max-w-xl mx-auto px-4 mt-6">
-        <div id="produtos-container" class="space-y-3">
-            <!-- Renderizado dinamicamente via JS -->
-        </div>
+        <div id="produtos-container" class="space-y-3"></div>
+        <div id="admin-container" class="hidden space-y-4"></div>
     </main>
 
-    <!-- BARRA INFERIOR DO CARRINHO (ESTILO APP NATIVO) -->
+    <!-- BARRA DO CARRINHO -->
     <div id="carrinho-bar" class="fixed bottom-0 left-0 right-0 bg-neutral-900/95 backdrop-blur-lg border-t border-neutral-800 p-4 max-w-xl mx-auto hidden z-40 shadow-2xl rounded-t-3xl">
         <div class="flex justify-between items-center mb-2.5 px-2">
             <span class="text-xs text-neutral-400 font-medium"><span id="total-itens" class="font-bold text-white">0</span> itens selecionados</span>
@@ -167,11 +152,11 @@
         <button onclick="abrirResumo()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-red-600/25 text-xs transition-transform active:scale-95">Ver Pedido e Enviar para a Cozinha</button>
     </div>
 
-    <!-- Modal Resumo do Pedido -->
-    <div id="modal-resumo" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <!-- Modal Resumo -->
+    <div id="modal-resumo" class="fixed inset-0 bg-neutral-950/85 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-neutral-900 w-full max-w-md rounded-t-[2rem] sm:rounded-3xl p-6 border border-neutral-800 shadow-2xl">
             <div class="flex justify-between items-center mb-3">
-                <h2 id="modal-titulo" class="text-base font-black text-white">Confirme seu Pedido</h2>
+                <h2 class="text-base font-black text-white">Confirme seu Pedido</h2>
                 <button onclick="fecharResumo()" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 font-bold">&times;</button>
             </div>
             <div id="lista-carrinho" class="space-y-2 max-h-52 overflow-y-auto mb-3 text-sm pr-1 no-scrollbar"></div>
@@ -181,6 +166,19 @@
             </div>
             <button onclick="enviarPedidoFirebase()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-2xl mb-2 text-xs shadow-lg shadow-red-600/20">🚀 Enviar para a Cozinha</button>
             <button onclick="fecharResumo()" class="w-full bg-neutral-800 text-neutral-300 font-bold py-3 rounded-2xl text-xs">Continuar escolhendo</button>
+        </div>
+    </div>
+
+    <!-- Modal Senha Admin -->
+    <div id="modal-senha-admin" class="fixed inset-0 bg-neutral-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-neutral-900 w-full max-w-sm rounded-3xl p-6 border border-neutral-800 text-center shadow-2xl">
+            <h2 class="text-lg font-black text-white mb-1">Acesso Restrito</h2>
+            <p class="text-xs text-neutral-400 mb-4">Insira a senha do painel:</p>
+            <input type="password" id="input-senha-admin" maxlength="4" placeholder="••••" class="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-3.5 text-center text-xl tracking-[0.5em] text-white mb-4 focus:outline-none focus:border-red-600">
+            <div class="flex gap-2">
+                <button onclick="fecharSenhaAdmin()" class="w-1/2 bg-neutral-800 text-neutral-300 font-bold py-3 rounded-2xl text-xs">Cancelar</button>
+                <button onclick="validarSenhaAdmin()" class="w-1/2 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-2xl text-xs shadow-lg shadow-red-600/20">Entrar</button>
+            </div>
         </div>
     </div>
 
@@ -197,78 +195,50 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Cardápio completo com imagens ilustrativas profissionais via Unsplash para cada item
-        const cardapio = {
+        // Cardápio Padrão (Caso o banco ainda não tenha dados salvos)
+        let cardapio = {
             "CHURRASCOS": [
-                ["Frango", 8, "Suculento espeto de frango na brasa", "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80"],
-                ["Porco", 8, "Espeto suíno temperado com ervas", "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80"],
-                ["Linguiça", 8, "Linguiça artesanal grelhada no ponto", "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=300&q=80"],
-                ["Coração de frango", 8, "Corações selecionados e marinados", "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80"],
-                ["Coração de boi", 8, "Coração bovino grelhado na brasa forte", "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80"],
-                ["Carne", 8, "Espeto de carne bovina macia", "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=300&q=80"],
-                ["Tripa", 8, "Tripa super crocante na brasa", "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80"]
+                { id: "ch_1", nome: "Frango", preco: 8, desc: "Suculento espeto de frango na brasa", foto: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_2", nome: "Porco", preco: 8, desc: "Espeto suíno temperado com ervas", foto: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_3", nome: "Linguiça", preco: 8, desc: "Linguiça artesanal grelhada no ponto", foto: "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_4", nome: "Coração de frango", preco: 8, desc: "Corações selecionados e marinados", foto: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_5", nome: "Coração de boi", preco: 8, desc: "Coração bovino grelhado na brasa forte", foto: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_6", nome: "Carne", preco: 8, desc: "Espeto de carne bovina macia", foto: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=300&q=80" },
+                { id: "ch_7", nome: "Tripa", preco: 8, desc: "Tripa super crocante na brasa", foto: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80" }
             ],
             "CARANGUEJO": [
-                ["Caranguejo Unidade", 8, "Unidade fresca ao leite de coco", "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80"],
-                ["Combo 4 Caranguejos", 28, "Combo promocional com 4 unidades", "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80"],
-                ["Caldo de Caranguejo", 5, "Caldo quentinho e temperado", "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80"]
+                { id: "ca_1", nome: "Caranguejo Unidade", preco: 8, desc: "Unidade fresca ao leite de coco", foto: "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80" },
+                { id: "ca_2", nome: "Combo 4 Caranguejos", preco: 28, desc: "Combo promocional com 4 unidades", foto: "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80" },
+                { id: "ca_3", nome: "Caldo de Caranguejo", preco: 5, desc: "Caldo quentinho e temperado", foto: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80" }
             ],
             "BEBIDAS": [
-                ["Skol", 5, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Brahma Chopp", 5, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Brahma Puro Malte", 5, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Império", 9, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Heineken", 9, "Long Neck 330ml", "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80"],
-                ["Corona Extra", 10, "Long Neck 330ml", "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80"],
-                ["Budweiser", 8, "Long Neck 330ml", "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80"],
-                ["Vinho", 8, "Taça / Dose", "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=300&q=80"],
-                ["Caipirinha", 15, "Cachaça, limão e açúcar", "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=300&q=80"],
-                ["Energético Red bull", 12, "Lata 250ml", "https://images.unsplash.com/photo-1622543925917-763c34d1a86e?auto=format&fit=crop&w=300&q=80"],
-                ["Kit gin", 80, "Gin rock’s / energético / Gelo", "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=300&q=80"],
-                ["Stella gold", 11, "Long Neck 330ml", "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80"],
-                ["Ice cabaré", 9, "Long Neck 275ml", "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80"],
-                ["Balde Skol", 50, "Balde com várias unidades", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Balde Brahma", 50, "Balde com várias unidades", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Terça amarela", 7, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Terça prata", 6, "Lata 350ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Meio litro amarela", 16, "Garrafa 600ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Meio litro prata", 15, "Garrafa 600ml", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Litro da amarela", 35, "Garrafa 1 Litro", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"],
-                ["Litro da prata", 30, "Garrafa 1 Litro", "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80"]
+                { id: "be_1", nome: "Skol", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_2", nome: "Brahma Chopp", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_3", nome: "Brahma Puro Malte", preco: 5, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_4", nome: "Império", preco: 9, desc: "Lata 350ml", foto: "https://images.unsplash.com/photo-1608270105742-f83196f4fc96?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_5", nome: "Heineken", preco: 9, desc: "Long Neck 330ml", foto: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_6", nome: "Corona Extra", preco: 10, desc: "Long Neck 330ml", foto: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_7", nome: "Budweiser", preco: 8, desc: "Long Neck 330ml", foto: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_8", nome: "Vinho", preco: 8, desc: "Taça / Dose", foto: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_9", nome: "Caipirinha", preco: 15, desc: "Cachaça, limão e açúcar", foto: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_10", nome: "Energético Red bull", preco: 12, desc: "Lata 250ml", foto: "https://images.unsplash.com/photo-1622543925917-763c34d1a86e?auto=format&fit=crop&w=300&q=80" },
+                { id: "be_11", nome: "Kit gin", preco: 80, desc: "Gin rock’s / energético / Gelo", foto: "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=300&q=80" }
             ],
             "GUARNIÇÕES": [
-                ["Baião caseiro grande", 8, "Porção grande tradicional", "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80"],
-                ["Baião caseiro pequeno", 4, "Porção individual", "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80"],
-                ["Baião cremoso grande", 10, "Com requeijão cremoso", "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80"],
-                ["Baião cremoso pequeno", 5, "Individual cremoso", "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80"],
-                ["Feijão verde", 25, "Combo especial temperado", "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80"],
-                ["Panelada", 18, "Acompanha arroz / farofa", "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80"]
+                { id: "gu_1", nome: "Baião caseiro grande", preco: 8, desc: "Porção grande tradicional", foto: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80" },
+                { id: "gu_2", nome: "Baião caseiro pequeno", preco: 4, desc: "Porção individual", foto: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80" },
+                { id: "gu_3", nome: "Feijão verde", preco: 25, desc: "Combo especial temperado", foto: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80" },
+                { id: "gu_4", nome: "Panelada", preco: 18, desc: "Acompanha arroz / farofa", foto: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80" }
             ],
             "PETISCOS": [
-                ["Batata frita", 15, "Porção crocante", "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=300&q=80"],
-                ["Calabresa acebolada", 15, "Com cebolas douradas", "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=300&q=80"],
-                ["Camarão (porção)", 25, "Camarões selecionados", "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80"],
-                ["Bolinha carne do sol", 18, "Porção recheada", "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=300&q=80"],
-                ["Bolinha de queijo", 15, "Crocante e derretida", "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=300&q=80"]
+                { id: "pe_1", nome: "Batata frita", preco: 15, desc: "Porção crocante", foto: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=300&q=80" },
+                { id: "pe_2", nome: "Calabresa acebolada", preco: 15, desc: "Com cebolas douradas", foto: "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=300&q=80" },
+                { id: "pe_3", nome: "Camarão (porção)", preco: 25, desc: "Camarões selecionados", foto: "https://images.unsplash.com/photo-1565680314444-c752c0024f21?auto=format&fit=crop&w=300&q=80" }
             ],
             "REFRIGERANTES": [
-                ["Coca-Cola 1L", 8, "Garrafa 1 Litro", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
-                ["Guaraná 1L", 7, "Garrafa 1 Litro", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
-                ["Pepsi 1L", 7, "Garrafa 1 Litro", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
-                ["Coca-Cola lata", 5, "Lata 350ml", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
-                ["Fanta lata", 5, "Lata 350ml", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
-                ["Sprite lata", 6, "Lata 350ml", "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"],
-                ["Água", 3, "Garrafa 500ml sem gás", "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=300&q=80"],
-                ["Água com gás", 4, "Garrafa 500ml com gás", "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=300&q=80"]
-            ],
-            "SUCOS": [
-                ["Suco Maracujá 400ml", 8, "Fruta natural da polpa", "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=300&q=80"],
-                ["Suco Manga 400ml", 7, "Refrescante e cremoso", "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=300&q=80"],
-                ["Suco Goiaba 400ml", 7, "Sabor natural", "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=300&q=80"]
-            ],
-            "DIVERSOS": [
-                ["Cigarro", 7, "Carteira", "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=300&q=80"],
-                ["Partilha halls", 3, "Unidade de pastilha", "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=300&q=80"]
+                { id: "re_1", nome: "Coca-Cola 1L", preco: 8, desc: "Garrafa 1 Litro", foto: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" },
+                { id: "re_2", nome: "Guaraná 1L", preco: 7, desc: "Garrafa 1 Litro", foto: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" },
+                { id: "re_3", nome: "Água", preco: 3, desc: "Garrafa 500ml sem gás", foto: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=300&q=80" }
             ]
         };
 
@@ -276,6 +246,20 @@
         let mesaSelecionadaParaValidar = null;
         let categoriaAtiva = "CHURRASCOS";
         let carrinho = [];
+
+        // Carregar cardápio salvo no Firebase ao iniciar
+        async function carregarCardapioDoFirebase() {
+            try {
+                const doc = await db.collection('configuracoes').doc('cardapio_global').get();
+                if (doc.exists && doc.data().dados) {
+                    cardapio = doc.data().dados;
+                }
+            } catch (e) {
+                console.error("Usando cardápio local padrão.");
+            }
+            renderizarCategorias();
+            renderizarProdutos();
+        }
 
         async function iniciarGridMesas() {
             const grid = document.getElementById('grid-mesas');
@@ -310,12 +294,10 @@
 
         async function clicarMesa(num, ocupada) {
             mesaSelecionadaParaValidar = num;
-            
             if (mesaAtual && num === mesaAtual) {
                 selecionarMesaFinal(num);
                 return;
             }
-
             if (!ocupada) {
                 await transferirMesaSeNecessario(num);
             } else {
@@ -334,11 +316,10 @@
                     const comandaAntigaRef = db.collection('comandas').doc(String(antigaMesa));
                     const docAntigo = await comandaAntigaRef.get();
                     if (docAntigo.exists) {
-                        const dadosAntigos = docAntigo.data();
-                        await db.collection('comandas').doc(String(novaMesa)).set(dadosAntigos);
+                        await db.collection('comandas').doc(String(novaMesa)).set(docAntigo.data());
                         await comandaAntigaRef.delete();
                     }
-                } catch(e) { console.error("Erro ao transferir mesa", e); }
+                } catch(e) { console.error(e); }
             }
             selecionarMesaFinal(novaMesa);
         }
@@ -413,11 +394,10 @@
                         solicitadoEm: Date.now(),
                         novoPedidoAlerta: true 
                     }, { merge: true });
-                    
                     alert('Conta solicitada com sucesso! O garçom já foi avisado.');
                     fecharComandaModal();
                 } catch(e) {
-                    alert('Erro ao solicitar a conta. Verifique sua conexão.');
+                    alert('Erro ao solicitar a conta.');
                 }
             }
         }
@@ -431,11 +411,10 @@
                 "GUARNIÇÕES": "fa-bowl-food",
                 "PETISCOS": "fa-cookie-bite",
                 "REFRIGERANTES": "fa-glass-water",
-                "SUCOS": "fa-cup-straw",
-                "DIVERSOS": "fa-basket-shopping"
+                "ADMIN": "fa-gear"
             };
 
-            container.innerHTML = Object.keys(cardapio).map(cat => {
+            let html = Object.keys(cardapio).map(cat => {
                 const ativa = cat === categoriaAtiva;
                 const icone = icones[cat] || "fa-utensils";
                 return `
@@ -447,6 +426,19 @@
                     </button>
                 `;
             }).join('');
+
+            // Botão fixo do Painel Admin no final
+            const adminAtivo = categoriaAtiva === "ADMIN";
+            html += `
+                <button onclick="tentarAbrirAdmin()" class="flex flex-col items-center justify-center min-w-[72px] h-20 ${adminAtivo ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/30' : 'bg-neutral-900 text-amber-500 border border-neutral-800'} rounded-2xl transition-all flex-shrink-0">
+                    <div class="w-9 h-9 rounded-full ${adminAtivo ? 'bg-white/20' : 'bg-neutral-800'} flex items-center justify-center mb-1 text-sm">
+                        <i class="fa-solid fa-gear"></i>
+                    </div>
+                    <span class="text-[11px] ${adminAtivo ? 'font-bold' : 'font-medium'}">ADMIN</span>
+                </button>
+            `;
+
+            container.innerHTML = html;
         }
 
         function mudarCategoria(cat) { 
@@ -455,31 +447,121 @@
             renderizarProdutos(); 
         }
 
+        function tentarAbrirAdmin() {
+            document.getElementById('input-senha-admin').value = '';
+            document.getElementById('modal-senha-admin').classList.remove('hidden');
+            document.getElementById('input-senha-admin').focus();
+        }
+
+        function fecharSenhaAdmin() {
+            document.getElementById('modal-senha-admin').classList.add('hidden');
+        }
+
+        function validarSenhaAdmin() {
+            const senha = document.getElementById('input-senha-admin').value.trim();
+            if (senha === "2201") {
+                fecharSenhaAdmin();
+                categoriaAtiva = "ADMIN";
+                renderizarCategorias();
+                renderizarProdutos();
+            } else {
+                alert("Senha de administrador incorreta!");
+            }
+        }
+
         function renderizarProdutos() {
             const container = document.getElementById('produtos-container');
-            const itensCat = cardapio[categoriaAtiva] || [];
+            const adminContainer = document.getElementById('admin-container');
 
-            container.innerHTML = itensCat.map(([nome, preco, desc, foto]) => {
-                const item = carrinho.find(i => i.nome === nome);
-                const qtd = item ? item.qtd : 0;
+            if (categoriaAtiva === "ADMIN") {
+                container.classList.add('hidden');
+                adminContainer.classList.remove('hidden');
+                document.getElementById('carrinho-bar').classList.add('hidden');
+
+                let adminHtml = `<div class="bg-neutral-900 p-4 rounded-2xl border border-amber-500/30 mb-4"><h2 class="text-sm font-black text-amber-500 mb-1">Painel de Gerenciamento</h2><p class="text-xs text-neutral-400">Altere preços, descrições ou links de fotos e clique em "Salvar Alterações".</p></div>`;
+
+                for (let cat in cardapio) {
+                    adminHtml += `<h3 class="text-xs font-black text-red-500 uppercase tracking-widest mt-6 mb-2 border-b border-neutral-800 pb-1">${cat}</h3>`;
+                    cardapio[cat].forEach((prod, index) => {
+                        adminHtml += `
+                            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 mb-3 space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-bold text-white">${prod.nome}</span>
+                                    <span class="text-[10px] bg-neutral-800 px-2 py-0.5 rounded text-neutral-400">${cat}</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="text-[10px] text-neutral-400 block mb-1">Preço (R$)</label>
+                                        <input type="number" step="0.50" id="admin-preco-${cat}-${index}" value="${prod.preco}" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-red-600">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-neutral-400 block mb-1">Link da Foto</label>
+                                        <input type="text" id="admin-foto-${cat}-${index}" value="${prod.foto}" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-red-600">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-neutral-400 block mb-1">Descrição</label>
+                                    <input type="text" id="admin-desc-${cat}-${index}" value="${prod.desc}" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-red-600">
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                adminHtml += `<button onclick="salvarAlteracoesAdmin()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 rounded-2xl text-xs shadow-xl shadow-amber-600/20 mt-4 mb-8">💾 Salvar Todas as Alterações</button>`;
+                adminContainer.innerHTML = adminHtml;
+                return;
+            }
+
+            adminContainer.classList.add('hidden');
+            container.classList.remove('hidden');
+
+            const itensCat = cardapio[categoriaAtiva] || [];
+            container.innerHTML = itensCat.map(prod => {
+                const itemCarrinho = carrinho.find(i => i.nome === prod.nome);
+                const qtd = itemCarrinho ? itemCarrinho.qtd : 0;
                 return `
                     <div class="bg-neutral-900/90 border border-neutral-800/80 rounded-2xl p-3.5 flex items-center gap-4 shadow-md transition-all hover:border-neutral-700">
-                        <img src="${foto}" alt="${nome}" class="w-20 h-20 object-cover rounded-xl flex-shrink-0 shadow">
+                        <img src="${prod.foto}" alt="${prod.nome}" class="w-20 h-20 object-cover rounded-xl flex-shrink-0 shadow" onerror="this.src='https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80'">
                         <div class="flex-1 min-w-0">
-                            <h3 class="font-bold text-sm text-white truncate">${nome}</h3>
-                            <p class="text-xs text-neutral-400 line-clamp-2 mt-0.5 leading-relaxed">${desc}</p>
+                            <h3 class="font-bold text-sm text-white truncate">${prod.nome}</h3>
+                            <p class="text-xs text-neutral-400 line-clamp-2 mt-0.5 leading-relaxed">${prod.desc}</p>
                             <div class="mt-2 flex items-center justify-between">
-                                <span class="text-sm font-extrabold text-red-500">R$ ${preco.toFixed(2).replace('.', ',')}</span>
+                                <span class="text-sm font-extrabold text-red-500">R$ ${prod.preco.toFixed(2).replace('.', ',')}</span>
                                 <div class="flex items-center gap-2 bg-neutral-950 p-1 rounded-xl border border-neutral-800">
-                                    <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, -1)" class="w-7 h-7 rounded-lg bg-neutral-800 text-neutral-200 font-bold text-xs flex items-center justify-center">-</button>
-                                    <span id="qtd-${nome}" class="w-5 text-center font-bold text-xs">${qtd}</span>
-                                    <button onclick="alterarQtd('${nome.replace(/'/g, "\\'")}', ${preco}, 1)" class="w-7 h-7 rounded-lg bg-red-600 text-white font-bold text-xs flex items-center justify-center">+</button>
+                                    <button onclick="alterarQtd('${prod.nome.replace(/'/g, "\\'")}', ${prod.preco}, -1)" class="w-7 h-7 rounded-lg bg-neutral-800 text-neutral-200 font-bold text-xs flex items-center justify-center">-</button>
+                                    <span id="qtd-${prod.nome}" class="w-5 text-center font-bold text-xs">${qtd}</span>
+                                    <button onclick="alterarQtd('${prod.nome.replace(/'/g, "\\'")}', ${prod.preco}, 1)" class="w-7 h-7 rounded-lg bg-red-600 text-white font-bold text-xs flex items-center justify-center">+</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        async function salvarAlteracoesAdmin() {
+            for (let cat in cardapio) {
+                cardapio[cat].forEach((prod, index) => {
+                    const inputPreco = document.getElementById(`admin-preco-${cat}-${index}`);
+                    const inputFoto = document.getElementById(`admin-foto-${cat}-${index}`);
+                    const inputDesc = document.getElementById(`admin-desc-${cat}-${index}`);
+
+                    if (inputPreco) prod.preco = parseFloat(inputPreco.value) || 0;
+                    if (inputFoto) prod.foto = inputFoto.value.trim();
+                    if (inputDesc) prod.desc = inputDesc.value.trim();
+                });
+            }
+
+            try {
+                await db.collection('configuracoes').doc('cardapio_global').set({ dados: cardapio });
+                alert("Cardápio atualizado e salvo com sucesso em nuvem!");
+                categoriaAtiva = "CHURRASCOS";
+                renderizarCategorias();
+                renderizarProdutos();
+            } catch (e) {
+                console.error(e);
+                alert("Erro ao salvar no banco de dados.");
+            }
         }
 
         function alterarQtd(nome, preco, delta) {
@@ -504,7 +586,7 @@
             document.getElementById('total-itens').innerText = totalQtd;
             document.getElementById('total-valor').innerText = `R$ ${totalVal.toFixed(2).replace('.', ',')}`;
             const bar = document.getElementById('carrinho-bar');
-            if (totalQtd > 0) bar.classList.remove('hidden'); else bar.classList.add('hidden');
+            if (totalQtd > 0 && categoriaAtiva !== "ADMIN") bar.classList.remove('hidden'); else bar.classList.add('hidden');
         }
 
         function abrirResumo() {
@@ -567,8 +649,7 @@
         }
 
         verificarMesaInicial();
-        renderizarCategorias();
-        renderizarProdutos();
+        carregarCardapioDoFirebase();
     </script>
 </body>
 </html>
