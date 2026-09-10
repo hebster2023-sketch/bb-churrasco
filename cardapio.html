@@ -490,8 +490,7 @@
                                     <img id="img-preview-${cat}-${index}" src="${prod.foto}" class="w-14 h-14 object-cover rounded-xl border border-neutral-800 flex-shrink-0">
                                     <div class="flex-1">
                                         <label class="text-[10px] text-neutral-400 block mb-1">Alterar Foto do Celular</label>
-                                        <input type="file" accept="image/*" onchange="converterFotoCelular(event, '${cat}', ${index})" class="w-full text-[11px] text-neutral-400 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-neutral-800 file:text-white hover:file:bg-neutral-700">
-                                        <!-- Armazena o link/base64 atual -->
+                                        <input type="file" accept="image/*" onchange="comprimirEConverterFoto(event, '${cat}', ${index})" class="w-full text-[11px] text-neutral-400 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-neutral-800 file:text-white hover:file:bg-neutral-700">
                                         <input type="hidden" id="admin-foto-${cat}-${index}" value="${prod.foto}">
                                     </div>
                                 </div>
@@ -541,18 +540,46 @@
             }).join('');
         }
 
-        // Converte a foto escolhida do celular para formato leve e atualiza a pré-visualização na hora
-        function converterFotoCelular(event, cat, index) {
+        // Reduz o tamanho e comprime a foto automaticamente para não travar o banco de dados
+        function comprimirEConverterFoto(event, cat, index) {
             const arquivo = event.target.files[0];
             if (!arquivo) return;
 
             const leitor = new FileReader();
             leitor.onload = function(e) {
-                const resultadoBase64 = e.target.result;
-                // Guarda o valor no input oculto
-                document.getElementById(`admin-foto-${cat}-${index}`).value = resultadoBase64;
-                // Atualiza a imagem redonda/quadrada pequena de pré-visualização
-                document.getElementById(`img-preview-${cat}-${index}`).src = resultadoBase64;
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Reduz a resolução máxima para manter a foto super leve
+                    let largura = img.width;
+                    let altura = img.height;
+                    const maxTamanho = 300; 
+
+                    if (largura > altura) {
+                        if (largura > maxTamanho) {
+                            altura *= maxTamanho / largura;
+                            largura = maxTamanho;
+                        }
+                    } else {
+                        if (altura > maxTamanho) {
+                            largura *= maxTamanho / altura;
+                            altura = maxTamanho;
+                        }
+                    }
+
+                    canvas.width = largura;
+                    canvas.height = altura;
+                    ctx.drawImage(img, 0, 0, largura, altura);
+
+                    // Converte comprimindo a qualidade para 70%
+                    const imagemComprimida = canvas.toDataURL('image/jpeg', 0.7);
+
+                    document.getElementById(`admin-foto-${cat}-${index}`).value = imagemComprimida;
+                    document.getElementById(`img-preview-${cat}-${index}`).src = imagemComprimida;
+                }
+                img.src = e.target.result;
             };
             leitor.readAsDataURL(arquivo);
         }
@@ -578,7 +605,7 @@
                 renderizarProdutos();
             } catch (e) {
                 console.error(e);
-                alert("Erro ao salvar no banco de dados.");
+                alert("Erro ao salvar no banco de dados. Tente colocar uma foto menor.");
             }
         }
 
