@@ -298,7 +298,6 @@
             if (!ocupada) {
                 await transferirMesaSeNecessario(num);
             } else {
-                // Senha removida visualmente da instrução abaixo
                 document.getElementById('grid-mesas').classList.add('hidden');
                 document.getElementById('modal-mesa-titulo').innerText = `Mesa ${num} está Ocupada`;
                 document.getElementById('input-senha-mesa').value = '';
@@ -473,6 +472,7 @@
 
         function fecharResumo() { document.getElementById('modal-resumo').classList.add('hidden'); }
 
+        // Função enviarPedidoFirebase corrigida (acumula os itens corretamente sem sobrescrever)
         async function enviarPedidoFirebase() {
             const cliente = document.getElementById('nome-cliente').value.trim() || "Cliente Anônimo";
             if (!carrinho.length || !mesaAtual) return;
@@ -487,11 +487,20 @@
                     totalExistente = doc.data().total || 0;
                 }
 
-                const novosItens = carrinho.map(i => ({ cliente, nome: i.nome, qtd: i.qtd, preco: i.preco }));
+                // Mapeia todos os itens do carrinho atual corretamente
+                const novosItens = carrinho.map(i => ({ 
+                    cliente, 
+                    nome: i.nome, 
+                    qtd: i.qtd, 
+                    preco: i.preco,
+                    adicionadoEm: Date.now()
+                }));
+                
                 const valorAdicional = carrinho.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
 
+                // Junta os itens antigos com os novos sem perder nenhum
                 await comandaRef.set({
-                    garcom: "Hebster",
+                    garcom: doc.exists && doc.data().garcom ? doc.data().garcom : "Hebster",
                     itens: [...itensExistentes, ...novosItens],
                     total: totalExistente + valorAdicional,
                     criadoEm: doc.exists ? doc.data().criadoEm : Date.now(),
@@ -504,7 +513,10 @@
                 renderizarProdutos();
                 atualizarBarraCarrinho();
                 fecharResumo();
-            } catch (err) { alert('Erro ao enviar.'); }
+            } catch (err) { 
+                console.error(err);
+                alert('Erro ao enviar o pedido.'); 
+            }
         }
 
         verificarMesaInicial();
