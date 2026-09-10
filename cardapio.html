@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
@@ -20,7 +20,7 @@
 </head>
 <body class="bg-zinc-100 text-zinc-900 dark:bg-[#0a0c0f] dark:text-zinc-100 min-h-screen pb-40 transition-colors duration-300 font-sans">
 
-    <!-- Modal de Seleção de Mesa (PIN Seguro 2201) -->
+    <!-- Modal de Seleção de Mesa (PIN Seguro 2201 apenas para mesas de outros) -->
     <div id="modal-mesa" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 text-center shadow-2xl">
             <div class="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-4 sm:hidden"></div>
@@ -31,7 +31,7 @@
                 <!-- Preenchido via JS -->
             </div>
 
-            <!-- Bloco de Senha para Mesa Ocupada (Senha 2201) -->
+            <!-- Bloco de Senha para Mesa Ocupada por Outro (Senha 2201) -->
             <div id="bloco-senha-mesa" class="hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 text-left">
                 <p id="label-senha-instrucao" class="text-xs text-zinc-600 dark:text-zinc-300 mb-2 font-medium">Mesa Ocupada. Insira a senha (2201):</p>
                 <input type="password" id="input-senha-mesa" maxlength="4" placeholder="••••" class="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-2xl p-3.5 text-center text-xl tracking-[0.5em] text-zinc-900 dark:text-white mb-3 focus:outline-none focus:border-red-600">
@@ -166,7 +166,6 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // CARDÁPIO ORIGINAL COMPLETO RESTAURADO
         const cardapio = {
             "CHURRASCOS": [
                 ["Frango", 8, "Suculento espeto de frango"],
@@ -241,7 +240,7 @@
             ]
         };
 
-        let mesaAtual = null;
+        let mesaAtual = localStorage.getItem('bb_mesa_atual') ? parseInt(localStorage.getItem('bb_mesa_atual')) : null;
         let mesaSelecionadaParaValidar = null;
         let categoriaAtiva = "CHURRASCOS";
         let carrinho = [];
@@ -290,9 +289,17 @@
 
         async function clicarMesa(num, ocupada) {
             mesaSelecionadaParaValidar = num;
+            
+            // SE A MESA CLICADA FOR A PRÓPRIA MESA DO CLIENTE JÃ SALVA, ENTRA DIRETO SEM SENHA!
+            if (mesaAtual && num === mesaAtual) {
+                selecionarMesaFinal(num);
+                return;
+            }
+
             if (!ocupada) {
                 await transferirMesaSeNecessario(num);
             } else {
+                // Se a mesa está ocupada por OUTRO, pede a senha de segurança (2201)
                 document.getElementById('grid-mesas').classList.add('hidden');
                 document.getElementById('modal-mesa-titulo').innerText = `Mesa ${num} está Ocupada`;
                 document.getElementById('input-senha-mesa').value = '';
@@ -327,12 +334,24 @@
         }
 
         function voltarGridMesas() { iniciarGridMesas(); }
-        function verificarMesaInicial() { iniciarGridMesas(); }
+        
+        function verificarMesaInicial() {
+            if (mesaAtual) {
+                // Se o cliente já tem mesa salva, fecha o modal automaticamente e exibe a mesa dele
+                selecionarMesaFinal(mesaAtual);
+            } else {
+                document.getElementById('modal-mesa').classList.remove('hidden');
+                iniciarGridMesas();
+            }
+        }
+
         function selecionarMesaFinal(num) {
             mesaAtual = num;
+            localStorage.setItem('bb_mesa_atual', mesaAtual);
             document.getElementById('mesa-display').innerText = `Mesa ${mesaAtual} • Cardápio Digital`;
             document.getElementById('modal-mesa').classList.add('hidden');
         }
+
         function mudarMesa() {
             document.getElementById('modal-mesa').classList.remove('hidden');
             iniciarGridMesas();
@@ -370,9 +389,19 @@
         async function pedirConta() {
             if (!mesaAtual) return;
             if (confirm(`Deseja solicitar o fechamento da conta da Mesa ${mesaAtual}?`)) {
-                await db.collection('comandas').doc(String(mesaAtual)).set({ contaSolicitada: true, solicitadoEm: Date.now() }, { merge: true });
-                alert('Conta solicitada com sucesso! O garçom já foi avisado.');
-                fecharComandaModal();
+                try {
+                    // Atualiza o Firestore garantindo que os alertas sonoros/visuais disparem na tela do garçom
+                    await db.collection('comandas').doc(String(mesaAtual)).set({ 
+                        contaSolicitada: true, 
+                        solicitadoEm: Date.now(),
+                        novoPedidoAlerta: true 
+                    }, { merge: true });
+                    
+                    alert('Conta solicitada com sucesso! O garçom já foi avisado.');
+                    fecharComandaModal();
+                } catch(e) {
+                    alert('Erro ao solicitar a conta. Verifique sua conexão.');
+                }
             }
         }
 
