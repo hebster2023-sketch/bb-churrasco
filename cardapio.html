@@ -68,7 +68,7 @@
         </div>
     </div>
 
-    <!-- Modal: Informações / Rodapé do Estabelecimento (Atualizado) -->
+    <!-- Modal: Informações / Rodapé do Estabelecimento -->
     <div id="modal-info" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
             <div class="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-4 sm:hidden"></div>
@@ -80,13 +80,13 @@
                 <div class="bg-zinc-50 dark:bg-zinc-800/50 p-3.5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between">
                     <div>
                         <p class="font-bold text-zinc-900 dark:text-white text-xs">📶 Wi-Fi para Clientes</p>
-                        <p class="text-[11px] text-zinc-500 mt-0.5">Rede: <span class="font-semibold text-red-600">BB.churrasco</span></p>
+                        <p class="text-[11px] text-zinc-500 mt-0.5">Rede: <span class="font-semibold text-red-600">BB_CHURRASCO_CLIENTES</span></p>
                     </div>
-                    <span class="font-mono bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 px-2.5 py-1 rounded-xl text-xs font-bold">deus2010</span>
+                    <span class="font-mono bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 px-2.5 py-1 rounded-xl text-xs font-bold">churras10</span>
                 </div>
                 <div class="bg-zinc-50 dark:bg-zinc-800/50 p-3.5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800">
                     <p class="font-bold text-zinc-900 dark:text-white text-xs mb-1">⏰ Horário de Funcionamento</p>
-                    <p class="text-[11px] text-zinc-500">Terça a Sábado: 18h00 às 01h00</p>
+                    <p class="text-[11px] text-zinc-500">Terça a Domingo: 17h00 às 23h30</p>
                 </div>
                 <div class="bg-zinc-50 dark:bg-zinc-800/50 p-3.5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800">
                     <p class="font-bold text-zinc-900 dark:text-white text-xs mb-1">💳 Formas de Pagamento</p>
@@ -166,6 +166,7 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // CARDÁPIO ORIGINAL COMPLETO RESTAURADO
         const cardapio = {
             "CHURRASCOS": [
                 ["Frango", 8, "Suculento espeto de frango"],
@@ -182,27 +183,61 @@
                 ["Caldo de Caranguejo", 5, "Caldo quentinho e temperado"]
             ],
             "BEBIDAS": [
-                ["Skol", 5, "Lata 350ml"], ["Brahma Chopp", 5, "Lata 350ml"], ["Heineken", 9, "Long Neck 330ml"],
-                ["Caipirinha", 15, "Cachaça, limão e açúcar"], ["Energético Red bull", 12, "Lata 250ml"]
+                ["Skol", 5, "Lata 350ml"],
+                ["Brahma Chopp", 5, "Lata 350ml"],
+                ["Brahma Puro Malte", 5, "Lata 350ml"],
+                ["Império", 9, "Lata 350ml"],
+                ["Heineken", 9, "Long Neck 330ml"],
+                ["Corona Extra", 10, "Long Neck 330ml"],
+                ["Budweiser", 8, "Long Neck 330ml"],
+                ["Vinho", 8, "Taça / Dose"],
+                ["Caipirinha", 15, "Cachaça, limão e açúcar (Copo)"],
+                ["Energético Red bull", 12, "Lata 250ml"],
+                ["Kit gin", 80, "Gin rock’s / energético Baly / Gelo (Garrafa/Kit)"],
+                ["Stella gold", 11, "Long Neck 330ml"],
+                ["Ice cabaré", 9, "Long Neck 275ml"],
+                ["Balde Skol", 50, "Balde com várias unidades"],
+                ["Balde Brahma", 50, "Balde com várias unidades"],
+                ["Terça amarela", 7, "Lata 350ml"],
+                ["Terça prata", 6, "Lata 350ml"],
+                ["Meio litro amarela", 16, "Garrafa 600ml"],
+                ["Meio litro prata", 15, "Garrafa 600ml"],
+                ["Litro da amarela", 35, "Garrafa 1 Litro"],
+                ["Litro da prata", 30, "Garrafa 1 Litro"]
             ],
             "GUARNIÇÕES": [
                 ["Baião caseiro grande", 8, "Porção grande tradicional"],
                 ["Baião caseiro pequeno", 4, "Porção individual"],
-                ["Feijão verde", 25, "Combo especial"]
+                ["Baião cremoso grande", 10, "Com requeijão cremoso"],
+                ["Baião cremoso pequeno", 5, "Individual cremoso"],
+                ["Feijão verde", 25, "Combo especial"],
+                ["Panelada", 18, "Acompanha arroz / farofa de cuscuz"]
             ],
             "PETISCOS": [
                 ["Batata frita", 15, "Porção crocante"],
-                ["Calabresa acebolada", 15, "Com cebolas douradas"]
+                ["Calabresa acebolada", 15, "Com cebolas douradas"],
+                ["Camarão (porção)", 25, "Camarões selecionados"],
+                ["Bolinha carne do sol", 18, "Porção recheada"],
+                ["Bolinha de queijo", 15, "Crocante e derretida"]
             ],
             "REFRIGERANTES": [
                 ["Coca-Cola 1L", 8, "Garrafa 1 Litro"],
-                ["Guaraná 1L", 7, "Garrafa 1 Litro"]
+                ["Guaraná 1L", 7, "Garrafa 1 Litro"],
+                ["Pepsi 1L", 7, "Garrafa 1 Litro"],
+                ["Coca-Cola lata", 5, "Lata 350ml"],
+                ["Fanta lata", 5, "Lata 350ml"],
+                ["Sprite lata", 6, "Lata 350ml"],
+                ["Água", 3, "Garrafa 500ml sem gás"],
+                ["Água com gás", 4, "Garrafa 500ml com gás"]
             ],
             "SUCOS": [
-                ["Suco Maracujá 400ml", 8, "Fruta natural da polpa"]
+                ["Suco Maracujá 400ml", 8, "Fruta natural da polpa"],
+                ["Suco Manga 400ml", 7, "Refrescante e cremoso"],
+                ["Suco Goiaba 400ml", 7, "Sabor natural"]
             ],
             "DIVERSOS": [
-                ["Cigarro", 7, "Carteira"]
+                ["Cigarro", 7, "Carteira"],
+                ["Partilha halls", 3, "Unidade de pastilha"]
             ]
         };
 
@@ -256,7 +291,6 @@
         async function clicarMesa(num, ocupada) {
             mesaSelecionadaParaValidar = num;
             if (!ocupada) {
-                // Se mudou de mesa e já estava em outra, transfere os dados automaticamente!
                 await transferirMesaSeNecessario(num);
             } else {
                 document.getElementById('grid-mesas').classList.add('hidden');
@@ -275,9 +309,7 @@
                     const docAntigo = await comandaAntigaRef.get();
                     if (docAntigo.exists) {
                         const dadosAntigos = docAntigo.data();
-                        // Copia os dados para a nova mesa
                         await db.collection('comandas').doc(String(novaMesa)).set(dadosAntigos);
-                        // Apaga a comanda da mesa antiga
                         await comandaAntigaRef.delete();
                     }
                 } catch(e) { console.error("Erro ao transferir mesa", e); }
@@ -287,7 +319,6 @@
 
         async function confirmarSenhaMesa() {
             const senhaDigitada = document.getElementById('input-senha-mesa').value.trim();
-            // Senha fixa atualizada para 2201
             if (senhaDigitada === "2201") {
                 await transferirMesaSeNecessario(mesaSelecionadaParaValidar);
             } else {
@@ -439,7 +470,7 @@
                     total: totalExistente + valorAdicional,
                     criadoEm: doc.exists ? doc.data().criadoEm : Date.now(),
                     atualizadoEm: Date.now(),
-                    novoPedidoAlerta: true // Aciona o alerta na tela do garçom!
+                    novoPedidoAlerta: true
                 }, { merge: true });
 
                 alert('Pedido enviado com sucesso!');
