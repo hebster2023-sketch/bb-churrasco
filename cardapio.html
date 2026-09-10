@@ -1,9 +1,9 @@
  <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#121212" id="meta-theme-color">
+    <meta name="theme-color" content="#f4f4f5" id="meta-theme-color">
     <title>B.B CHURRASCO – Cardápio Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -21,7 +21,7 @@
 <body class="bg-zinc-100 text-zinc-900 dark:bg-[#0a0c0f] dark:text-zinc-100 min-h-screen pb-40 transition-colors duration-300 font-sans">
 
     <!-- Modal de Seleção de Mesa (PIN Seguro) -->
-    <div id="modal-mesa" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div id="modal-mesa" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 text-center shadow-2xl">
             <div class="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             <h1 class="text-2xl font-black text-red-600 tracking-tight mb-1">B.B CHURRASCO</h1>
@@ -44,7 +44,7 @@
     </div>
 
     <!-- Modal: Histórico de Pedidos da Comanda -->
-    <div id="modal-comanda" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div id="modal-comanda" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
             <div class="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             <div class="flex justify-between items-center mb-4">
@@ -69,7 +69,7 @@
     </div>
 
     <!-- Modal: Informações / Rodapé do Estabelecimento -->
-    <div id="modal-info" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div id="modal-info" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
             <div class="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             <div class="flex justify-between items-center mb-4">
@@ -80,13 +80,13 @@
                 <div class="bg-zinc-50 dark:bg-zinc-800/50 p-3.5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between">
                     <div>
                         <p class="font-bold text-zinc-900 dark:text-white text-xs">📶 Wi-Fi para Clientes</p>
-                        <p class="text-[11px] text-zinc-500 mt-0.5">Rede: <span class="font-semibold text-red-600">BB_CHURRASCO_CLIENTES</span></p>
+                        <p class="text-[11px] text-zinc-500 mt-0.5">Rede: <span class="font-semibold text-red-600">bb.churrasco</span></p>
                     </div>
-                    <span class="font-mono bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 px-2.5 py-1 rounded-xl text-xs font-bold">churras10</span>
+                    <span class="font-mono bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 px-2.5 py-1 rounded-xl text-xs font-bold">deus2010</span>
                 </div>
                 <div class="bg-zinc-50 dark:bg-zinc-800/50 p-3.5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800">
                     <p class="font-bold text-zinc-900 dark:text-white text-xs mb-1">⏰ Horário de Funcionamento</p>
-                    <p class="text-[11px] text-zinc-500">Terça a Domingo: 17h00 às 23h30</p>
+                    <p class="text-[11px] text-zinc-500">Terça a Sábado: 18h00 às 01h00</p>
                 </div>
                 <div class="bg-zinc-50 dark:bg-zinc-800/50 p-3.5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800">
                     <p class="font-bold text-zinc-900 dark:text-white text-xs mb-1">💳 Formas de Pagamento</p>
@@ -137,7 +137,7 @@
     </div>
 
     <!-- Modal Resumo -->
-    <div id="modal-resumo" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div id="modal-resumo" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
             <div class="flex justify-between items-center mb-3">
                 <h2 id="modal-titulo" class="text-base font-black text-zinc-900 dark:text-white">Confirme seu Pedido</h2>
@@ -245,14 +245,39 @@
         let categoriaAtiva = "CHURRASCOS";
         let carrinho = [];
 
+        // Inicialização do Tema: Padrão claro (white), alterável pelo usuário e salvo na memória
+        function inicializarTema() {
+            const temaSalvo = localStorage.getItem('bb_tema');
+            const html = document.documentElement;
+            const metaTheme = document.getElementById('meta-theme-color');
+            const iconeTema = document.getElementById('icone-tema');
+
+            if (temaSalvo === 'dark') {
+                html.classList.add('dark');
+                if(metaTheme) metaTheme.content = "#121212";
+                if(iconeTema) iconeTema.innerText = "🌙";
+            } else {
+                html.classList.remove('dark');
+                if(metaTheme) metaTheme.content = "#f4f4f5";
+                if(iconeTema) iconeTema.innerText = "☀️";
+            }
+        }
+
         function alternarTema() {
             const html = document.documentElement;
+            const metaTheme = document.getElementById('meta-theme-color');
+            const iconeTema = document.getElementById('icone-tema');
+
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
                 localStorage.setItem('bb_tema', 'light');
+                if(metaTheme) metaTheme.content = "#f4f4f5";
+                if(iconeTema) iconeTema.innerText = "☀️";
             } else {
                 html.classList.add('dark');
                 localStorage.setItem('bb_tema', 'dark');
+                if(metaTheme) metaTheme.content = "#121212";
+                if(iconeTema) iconeTema.innerText = "🌙";
             }
         }
 
@@ -472,7 +497,6 @@
 
         function fecharResumo() { document.getElementById('modal-resumo').classList.add('hidden'); }
 
-        // Função enviarPedidoFirebase corrigida (acumula os itens corretamente sem sobrescrever)
         async function enviarPedidoFirebase() {
             const cliente = document.getElementById('nome-cliente').value.trim() || "Cliente Anônimo";
             if (!carrinho.length || !mesaAtual) return;
@@ -487,7 +511,6 @@
                     totalExistente = doc.data().total || 0;
                 }
 
-                // Mapeia todos os itens do carrinho atual corretamente
                 const novosItens = carrinho.map(i => ({ 
                     cliente, 
                     nome: i.nome, 
@@ -498,7 +521,6 @@
                 
                 const valorAdicional = carrinho.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
 
-                // Junta os itens antigos com os novos sem perder nenhum
                 await comandaRef.set({
                     garcom: doc.exists && doc.data().garcom ? doc.data().garcom : "Hebster",
                     itens: [...itensExistentes, ...novosItens],
@@ -519,6 +541,7 @@
             }
         }
 
+        inicializarTema();
         verificarMesaInicial();
         renderizarCategorias();
         renderizarProdutos();
