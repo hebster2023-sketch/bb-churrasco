@@ -195,7 +195,7 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Cardápio completo exato com fotos e IDs
+        // Cardápio padrão inicial (caso o banco esteja vazio)
         let cardapio = {
             "CHURRASCOS": [
                 { id: "ch_1", nome: "Frango", preco: 8, desc: "Suculento espeto de frango", foto: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80" },
@@ -297,7 +297,6 @@
                         await db.collection('cardapio_categorias').doc(cat).set({ dados: cardapio[cat] });
                     }
                 }
-                console.log("Cardápio sincronizado com sucesso por categorias!");
             } catch (e) {
                 console.error("Erro ao sincronizar cardápio do Firebase, usando local.", e);
             }
@@ -419,7 +418,8 @@
                 listaEl.innerHTML = itens.map(i => {
                     const sub = (i.preco || 0) * (i.qtd || 0);
                     total += sub;
-                    return `<div class="flex justify-between items-center py-2.5 border-b border-neutral-800 text-xs"><div><span class="font-bold text-neutral-200">${i.qtd}x ${i.nome}</span></div><span class="font-black text-white">R$ ${sub.toFixed(2).replace('.', ',')}</span></div>`;
+                    let obsHtml = i.obs ? `<p class="text-[10px] text-amber-400 mt-0.5">Obs: ${i.obs}</p>` : '';
+                    return `<div class="py-2.5 border-b border-neutral-800 text-xs"><div class="flex justify-between items-center"><span class="font-bold text-neutral-200">${i.qtd}x ${i.nome}</span><span class="font-black text-white">R$ ${sub.toFixed(2).replace('.', ',')}</span></div>${obsHtml}</div>`;
                 }).join('');
                 document.getElementById('comanda-total-geral').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
             } catch(e) {}
@@ -456,8 +456,7 @@
                 "PETISCOS": "fa-cookie-bite",
                 "REFRIGERANTES": "fa-glass-water",
                 "SUCOS": "fa-blender",
-                "DIVERSOS": "fa-basket-shopping",
-                "ADMIN": "fa-gear"
+                "DIVERSOS": "fa-basket-shopping"
             };
 
             let html = Object.keys(cardapio).map(cat => {
@@ -568,27 +567,32 @@
             container.innerHTML = itensCat.map(prod => {
                 const itemCarrinho = carrinho.find(i => i.nome === prod.nome);
                 const qtd = itemCarrinho ? itemCarrinho.qtd : 0;
+                const obs = itemCarrinho ? itemCarrinho.obs || '' : '';
                 return `
-                    <div class="bg-neutral-900/90 border border-neutral-800/80 rounded-2xl p-3.5 flex items-center gap-4 shadow-md transition-all hover:border-neutral-700">
-                        <img src="${prod.foto}" alt="${prod.nome}" class="w-20 h-20 object-cover rounded-xl flex-shrink-0 shadow" onerror="this.src='https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80'">
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-bold text-sm text-white truncate">${prod.nome}</h3>
-                            <p class="text-xs text-neutral-400 line-clamp-2 mt-0.5 leading-relaxed">${prod.desc}</p>
-                            <div class="mt-2 flex items-center justify-between">
-                                <span class="text-sm font-extrabold text-red-500">R$ ${prod.preco.toFixed(2).replace('.', ',')}</span>
-                                <div class="flex items-center gap-2 bg-neutral-950 p-1 rounded-xl border border-neutral-800">
-                                    <button onclick="alterarQtd('${prod.nome.replace(/'/g, "\\'")}', ${prod.preco}, -1)" class="w-7 h-7 rounded-lg bg-neutral-800 text-neutral-200 font-bold text-xs flex items-center justify-center">-</button>
-                                    <span id="qtd-${prod.nome}" class="w-5 text-center font-bold text-xs">${qtd}</span>
-                                    <button onclick="alterarQtd('${prod.nome.replace(/'/g, "\\'")}', ${prod.preco}, 1)" class="w-7 h-7 rounded-lg bg-red-600 text-white font-bold text-xs flex items-center justify-center">+</button>
+                    <div class="bg-neutral-900/90 border border-neutral-800/80 rounded-2xl p-3.5 space-y-3 shadow-md transition-all hover:border-neutral-700">
+                        <div class="flex items-center gap-4">
+                            <img src="${prod.foto}" alt="${prod.nome}" class="w-20 h-20 object-cover rounded-xl flex-shrink-0 shadow" onerror="this.src='https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80'">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-bold text-sm text-white truncate">${prod.nome}</h3>
+                                <p class="text-xs text-neutral-400 line-clamp-2 mt-0.5 leading-relaxed">${prod.desc}</p>
+                                <div class="mt-2 flex items-center justify-between">
+                                    <span class="text-sm font-extrabold text-red-500">R$ ${prod.preco.toFixed(2).replace('.', ',')}</span>
+                                    <div class="flex items-center gap-2 bg-neutral-950 p-1 rounded-xl border border-neutral-800">
+                                        <button onclick="alterarQtd('${prod.nome.replace(/'/g, "\\'")}', ${prod.preco}, -1)" class="w-7 h-7 rounded-lg bg-neutral-800 text-neutral-200 font-bold text-xs flex items-center justify-center">-</button>
+                                        <span id="qtd-${prod.nome}" class="w-5 text-center font-bold text-xs">${qtd}</span>
+                                        <button onclick="alterarQtd('${prod.nome.replace(/'/g, "\\'")}', ${prod.preco}, 1)" class="w-7 h-7 rounded-lg bg-red-600 text-white font-bold text-xs flex items-center justify-center">+</button>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="${qtd > 0 ? 'block' : 'hidden'} pt-2 border-t border-neutral-800/60">
+                            <input type="text" placeholder="Observação (ex: sem cebola, mal passado...)" value="${obs}" oninput="atualizarObs('${prod.nome.replace(/'/g, "\\'")}', this.value)" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-[11px] text-white placeholder-neutral-500 focus:outline-none focus:border-red-600">
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        // Comprime fotos do admin automaticamente
         function comprimirEConverterFoto(event, cat, index) {
             const arquivo = event.target.files[0];
             if (!arquivo) return;
@@ -664,14 +668,17 @@
                 item.qtd += delta;
                 if (item.qtd <= 0) carrinho = carrinho.filter(i => i.nome !== nome);
             } else if (delta > 0) {
-                carrinho.push({ nome, preco, qtd: delta });
+                carrinho.push({ nome, preco, qtd: delta, obs: "" });
             }
-            const el = document.getElementById(`qtd-${nome}`);
-            if (el) {
-                const atual = carrinho.find(i => i.nome === nome);
-                el.innerText = atual ? atual.qtd : 0;
-            }
+            renderizarProdutos();
             atualizarBarraCarrinho();
+        }
+
+        function atualizarObs(nome, valor) {
+            let item = carrinho.find(i => i.nome === nome);
+            if (item) {
+                item.obs = valor;
+            }
         }
 
         function atualizarBarraCarrinho() {
@@ -690,7 +697,8 @@
             carrinho.forEach(item => {
                 const sub = item.preco * item.qtd;
                 total += sub;
-                lista.innerHTML += `<div class="flex justify-between items-center py-2 border-b border-neutral-800 text-xs"><span>${item.qtd}x ${item.nome}</span><span class="font-bold text-white">R$ ${sub.toFixed(2).replace('.', ',')}</span></div>`;
+                let obsHtml = item.obs ? `<p class="text-[10px] text-amber-400 mt-0.5">Obs: ${item.obs}</p>` : '';
+                lista.innerHTML += `<div class="py-2 border-b border-neutral-800 text-xs"><div class="flex justify-between items-center"><span>${item.qtd}x ${item.nome}</span><span class="font-bold text-white">R$ ${sub.toFixed(2).replace('.', ',')}</span></div>${obsHtml}</div>`;
             });
             document.getElementById('modal-total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
             document.getElementById('modal-resumo').classList.remove('hidden');
@@ -717,6 +725,7 @@
                     nome: i.nome, 
                     qtd: i.qtd, 
                     preco: i.preco,
+                    obs: i.obs || "",
                     adicionadoEm: Date.now()
                 }));
                 
